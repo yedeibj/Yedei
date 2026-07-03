@@ -1,58 +1,26 @@
-export type Subcategory = {
-  label: string;
-  href: string;
-};
-
-export type Category = {
-  slug: string;
-  label: string;
-  description: string;
-  image: string;
-  subcategories: Subcategory[];
-};
-
-// Données statiques temporaires — à remplacer par un appel base de données / CMS.
-export const categories: Category[] = [
-  {
-    slug: "femmes",
-    label: "Femmes",
-    description: "Robes, ensembles et essentiels du quotidien",
-    image: "https://picsum.photos/seed/yedei-femmes/1200/1500",
-    subcategories: [
-      { label: "Robes", href: "/femmes/robes" },
-      { label: "Ensembles", href: "/femmes/ensembles" },
-      { label: "Sous-vêtements", href: "/femmes/sous-vetements" },
-    ],
+{
+  "name": "admin",
+  "private": true,
+  "scripts": {
+    "dev": "next dev -p 3001",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
   },
-  {
-    slug: "hommes",
-    label: "Hommes",
-    description: "Chemises, pantalons et pièces intemporelles",
-    image: "https://picsum.photos/seed/yedei-hommes/1200/1500",
-    subcategories: [
-      { label: "Chemises", href: "/hommes/chemises" },
-      { label: "Pantalons", href: "/hommes/pantalons" },
-      { label: "T-shirts", href: "/hommes/t-shirts" },
-    ],
+  "dependencies": {
+    "next": "^15.0.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "@yedei/database": "workspace:*",
+    "@yedei/ui": "workspace:*"
   },
-  {
-    slug: "enfants",
-    label: "Enfants",
-    description: "Tenues robustes et élégantes pour grandir",
-    image: "https://picsum.photos/seed/yedei-enfants/1200/1500",
-    subcategories: [
-      { label: "Ensembles", href: "/enfants/ensembles" },
-      { label: "Tenues scolaires", href: "/enfants/tenues-scolaires" },
-    ],
-  },
-  {
-    slug: "bebes",
-    label: "Bébés",
-    description: "Douceur et confort dès les premiers jours",
-    image: "https://picsum.photos/seed/yedei-bebes/1200/1500",
-    subcategories: [
-      { label: "Bodies", href: "/bebes/bodies" },
-      { label: "Pyjamas", href: "/bebes/pyjamas" },
-    ],
-  },
-];
+  "devDependencies": {
+    "typescript": "^5.5.0",
+    "tailwindcss": "^3.4.0",
+    "postcss": "^8.4.0",
+    "autoprefixer": "^10.4.0",
+    "@yedei/config": "workspace:*",
+    "@types/node": "^20.0.0",
+    "@types/react": "^19.0.0"
+  }
+}
