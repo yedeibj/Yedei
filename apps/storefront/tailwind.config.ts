@@ -14,9 +14,14 @@ const config: Config = {
         stone: "#8C8579",
         "stone-light": "#D8D3C9",
         yedei: {
-          green: "#2F6B4F",
-          red: "#AD3B3B",
-          blue: "#233E6C",
+          green: "#006400",
+          red: "#DC143C",
+          blue: "#00008B",
+        },
+        surface: {
+          green: "#E8F5E9",
+          red: "#FDECEF",
+          blue: "#EEF3FF",
         },
       },
       fontFamily: {
