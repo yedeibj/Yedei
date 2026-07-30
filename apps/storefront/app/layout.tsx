@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Fraunces, Manrope } from "next/font/google";
 import "./globals.css";
+import PromoBar from "@/components/PromoBar";
 
 const fraunces = Fraunces({
   subsets: ["latin"],
@@ -9,7 +10,6 @@ const fraunces = Fraunces({
   weight: ["400", "500", "600"],
   display: "swap",
 });
-
 const manrope = Manrope({
   subsets: ["latin"],
   variable: "--font-manrope",
@@ -30,7 +30,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="fr" className={`${fraunces.variable} ${manrope.variable}`}>
-      <body className="font-sans antialiased">{children}</body>
+      <body className="font-sans antialiased">
+        <PromoBar />
+        {children}
+      </body>
     </html>
   );
 }
