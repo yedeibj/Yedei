@@ -36,17 +36,20 @@ body {
 
 .fil-yedei .fil-vert {
   width: 18px;
-  background-color: #2f6b4f;
+-  background-color: #2f6b4f;
++  background-color: #006400;
 }
 
 .fil-yedei .fil-rouge {
   width: 12px;
-  background-color: #ad3b3b;
+-  background-color: #ad3b3b;
++  background-color: #dc143c;
 }
 
 .fil-yedei .fil-bleu {
   width: 22px;
-  background-color: #233e6c;
+-  background-color: #233e6c;
++  background-color: #00008b;
 }
 
 /* Accessible focus ring used throughout instead of the default outline */
