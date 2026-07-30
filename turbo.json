@@ -12,3 +12,6 @@
     "lint": {}
   }
 }
+{
+  "globalEnv": ["ENABLE_EXPERIMENTAL_COREPACK"]
+}
