@@ -1,5 +1,5 @@
 import Header from "@/components/Header";
-import Hero from "@/components/Hero";
+import HeroSlider from "@/components/HeroSlider";
 import CategoryGrid from "@/components/CategoryGrid";
 import SubcategoryNav from "@/components/SubcategoryNav";
 import NewArrivals from "@/components/NewArrivals";
