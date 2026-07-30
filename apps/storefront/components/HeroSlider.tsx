@@ -6,7 +6,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { heroSlides } from "@/data/heroSlides";
 
 const AUTOPLAY_MS = 6000;
-const THREAD_COLORS = ["#2f6b4f", "#ad3b3b", "#233e6c"];
+const THREAD_COLORS = ["#006400", "#dc143c", "#00008b"];
 
 export default function HeroSlider() {
   const [index, setIndex] = useState(0);
@@ -71,7 +71,7 @@ export default function HeroSlider() {
                   </p>
                 )}
                 <h2
-                  className={`font-serif text-4xl italic leading-tight text-white transition-all duration-700 delay-300 sm:text-5xl ${
+                  className={`font-display text-4xl italic leading-tight text-white transition-all duration-700 delay-300 sm:text-5xl ${
                     isActive ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"
                   }`}
                 >
