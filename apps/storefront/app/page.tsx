@@ -10,7 +10,7 @@ export default function HomePage() {
   return (
     <main>
       <Header />
-      <Hero />
+      <HeroSlider />
       <CategoryGrid />
       <SubcategoryNav />
       <NewArrivals />
