@@ -1,41 +1,54 @@
 import Image from "next/image";
-import type { Product } from "@/data/products";
-import { formatPrice } from "@/data/products";
+import Link from "next/link";
 
-export default function ProductCard({ product }: { product: Product }) {
+type ProductCardProps = {
+  slug: string;
+  name: string;
+  price: number;
+  imageUrl?: string | null;
+  isNew?: boolean;
+  isBestSeller?: boolean;
+};
+
+export default function ProductCard({
+  slug,
+  name,
+  price,
+  imageUrl,
+  isNew,
+  isBestSeller,
+}: ProductCardProps) {
   return (
-    <article className="group">
-      <div className="relative aspect-[3/4] w-full overflow-hidden bg-sand">
-        <Image
-          src={product.image}
-          alt={product.name}
-          fill
-          sizes="(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw"
-          className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
-        />
-        {product.isNew && (
-          <span className="absolute left-3 top-3 bg-ink px-3 py-1 text-[11px] uppercase tracking-widest2 text-paper">
-            Nouveau
+    <Link
+      href={`/produits/${slug}`}
+      className="group w-[220px] flex-shrink-0 snap-start sm:w-[260px]"
+    >
+      <div className="relative aspect-[3/4] overflow-hidden rounded-md bg-[#F0EDE5]">
+        {imageUrl ? (
+          <Image
+            src={imageUrl}
+            alt={name}
+            fill
+            sizes="260px"
+            className="object-cover transition-transform duration-500 group-hover:scale-105"
+          />
+        ) : (
+          <div className="flex h-full items-center justify-center text-xs text-[#8C8579]">
+            Pas d'image
+          </div>
+        )}
+
+        {(isNew || isBestSeller) && (
+          <span className="absolute left-2 top-2 rounded-full bg-white/90 px-2 py-1 text-[10px] uppercase tracking-wide text-[#181715]">
+            {isNew ? "Nouveau" : "Meilleure vente"}
           </span>
         )}
-        <button
-          type="button"
-          className="absolute inset-x-3 bottom-3 translate-y-2 bg-paper py-3 text-xs uppercase tracking-widest2 text-ink opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100"
-        >
-          Ajouter au panier
-        </button>
       </div>
-      <div className="mt-3 flex items-start justify-between gap-2">
-        <div>
-          <p className="text-xs uppercase tracking-wide text-stone">
-            {product.category}
-          </p>
-          <h3 className="mt-0.5 text-sm text-ink">{product.name}</h3>
-        </div>
-        <span className="whitespace-nowrap text-sm text-ink">
-          {formatPrice(product)}
-        </span>
-      </div>
-    </article>
+
+      <p className="mt-3 font-sans text-sm text-[#181715]">{name}</p>
+      <p className="text-sm text-[#8C8579]">
+        {price.toLocaleString("fr-FR")} FCFA
+      </p>
+    </Link>
   );
 }
