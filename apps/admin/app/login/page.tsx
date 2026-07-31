@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { createBrowserSupabaseClient } from "@yedei/database";
+import { createClient as createBrowserSupabaseClient } from "@yedei/database/client";
 
 export default function LoginPage() {
   const router = useRouter();
