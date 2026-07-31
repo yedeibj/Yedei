@@ -16,7 +16,7 @@ const manrope = Manrope({
   weight: ["400", "500", "600", "700"],
   display: "swap",
 });
-
+export const revalidate = 60;
 export const metadata: Metadata = {
   title: "YEDEI — L'élégance pour toute la famille",
   description:
