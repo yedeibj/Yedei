@@ -1,4 +1,4 @@
-import { createMiddlewareClient } from "@yedei/database";
+import { createMiddlewareClient } from "@yedei/database/middleware";
 import type { NextRequest } from "next/server";
 
 export async function middleware(request: NextRequest) {
