@@ -1,6 +1,7 @@
-import { createServerSupabaseClient } from "@yedei/database";
+import { createClient as createServerSupabaseClient } from "@yedei/database/server";
 import Link from "next/link";
 import LogoutButton from "@/components/LogoutButton";
+
 
 export default async function AdminHomePage() {
   const supabase = await createServerSupabaseClient();
