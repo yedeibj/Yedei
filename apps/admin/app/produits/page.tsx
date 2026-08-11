@@ -1,6 +1,5 @@
 import { createClient as createServerSupabaseClient } from "@yedei/database/server";
 import Link from "next/link";
-import Image from "next/image";
 import AdminShell from "@/components/AdminShell";
 import ProductsFilterBar from "@/components/ProductsFilterBar";
 
@@ -71,12 +70,11 @@ export default async function ProductsPage({
                 <tr key={product.id} className="border-b border-[#F0EDE5] last:border-0">
                   <td className="px-4 py-3">
                     {product.product_images?.[0]?.url ? (
-                      <div className="relative h-12 w-12 overflow-hidden rounded-md bg-[#F0EDE5]">
-                        <Image
+                      <div className="h-12 w-12 overflow-hidden rounded-md bg-[#F0EDE5]">
+                        <img
                           src={product.product_images[0].url}
                           alt={product.name}
-                          fill
-                          className="object-cover"
+                          className="h-full w-full object-cover"
                         />
                       </div>
                     ) : (
