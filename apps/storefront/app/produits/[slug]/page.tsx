@@ -69,10 +69,6 @@ export default async function ProductPage({
             )}
           </div>
 
-          {product.description && (
-            <p className="mt-6 text-sm leading-relaxed text-[#8C8579]">{product.description}</p>
-          )}
-
           <AddToCartPanel
             productId={product.id}
             slug={slug}
@@ -82,7 +78,13 @@ export default async function ProductPage({
             variants={variants}
           />
 
-          <div className="mt-10 grid grid-cols-2 gap-4 border-t border-[#D8D3C9] pt-6 text-xs text-[#8C8579] sm:grid-cols-4">
+          {product.description && (
+            <p className="mt-8 border-t border-[#D8D3C9] pt-6 text-sm leading-relaxed text-[#8C8579]">
+              {product.description}
+            </p>
+          )}
+
+          <div className="mt-8 grid grid-cols-2 gap-4 border-t border-[#D8D3C9] pt-6 text-xs text-[#8C8579] sm:grid-cols-4">
             <p className="font-medium text-[#181715]">Tissus de qualité</p>
             <p className="font-medium text-[#181715]">Livraison rapide</p>
             <p className="font-medium text-[#181715]">Paiement sécurisé</p>
