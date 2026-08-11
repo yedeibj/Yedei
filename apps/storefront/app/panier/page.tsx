@@ -25,21 +25,24 @@ export default function CartPage() {
           <div className="mt-6 space-y-4">
             {items.map((item) => (
               <div
-                key={item.productId + item.size}
+                key={item.productId + item.variantId}
                 className="flex items-center gap-4 border-b border-[#F0EDE5] pb-4"
               >
-                <div className="h-20 w-20 overflow-hidden rounded-md bg-[#F0EDE5]">
+                <div className="h-20 w-20 overflow-hidden rounded-md bg-white">
                   {item.imageUrl && (
-                    <img src={item.imageUrl} alt="" className="h-full w-full object-cover" />
+                    <img src={item.imageUrl} alt="" className="h-full w-full object-contain" />
                   )}
                 </div>
                 <div className="flex-1">
                   <p className="text-sm text-[#181715]">{item.name}</p>
-                  <p className="text-xs text-[#8C8579]">Taille : {item.size}</p>
+                  <p className="text-xs text-[#8C8579]">
+                    Taille : {item.size}
+                    {item.variantLabel && ` — ${item.variantLabel}`}
+                  </p>
                   <div className="mt-1 flex items-center gap-2">
                     <button
                       type="button"
-                      onClick={() => updateQuantity(item.productId, item.size, item.quantity - 1)}
+                      onClick={() => updateQuantity(item.productId, item.variantId, item.quantity - 1)}
                       className="rounded border border-[#D8D3C9] px-2 text-xs"
                     >
                       −
@@ -47,7 +50,7 @@ export default function CartPage() {
                     <span className="text-xs">{item.quantity}</span>
                     <button
                       type="button"
-                      onClick={() => updateQuantity(item.productId, item.size, item.quantity + 1)}
+                      onClick={() => updateQuantity(item.productId, item.variantId, item.quantity + 1)}
                       className="rounded border border-[#D8D3C9] px-2 text-xs"
                     >
                       +
@@ -59,7 +62,7 @@ export default function CartPage() {
                 </p>
                 <button
                   type="button"
-                  onClick={() => removeItem(item.productId, item.size)}
+                  onClick={() => removeItem(item.productId, item.variantId)}
                   className="text-xs text-[#DC143C] hover:underline"
                 >
                   Retirer
