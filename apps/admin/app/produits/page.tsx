@@ -1,6 +1,7 @@
 import { createClient as createServerSupabaseClient } from "@yedei/database/server";
 import Link from "next/link";
 import Image from "next/image";
+import AdminShell from "@/components/AdminShell";
 
 export default async function ProductsPage() {
   const supabase = await createServerSupabaseClient();
@@ -10,7 +11,7 @@ export default async function ProductsPage() {
     .order("created_at", { ascending: false });
 
   return (
-    <main className="min-h-screen bg-[#F6F3EC] px-8 py-10">
+    <AdminShell>
       <div className="flex items-center justify-between">
         <h1 className="font-display text-2xl italic text-[#181715]">Produits</h1>
         <Link
@@ -30,12 +31,13 @@ export default async function ProductsPage() {
               <th className="px-4 py-3">Catégorie</th>
               <th className="px-4 py-3">Prix</th>
               <th className="px-4 py-3">Statut</th>
+              <th className="px-4 py-3"></th>
             </tr>
           </thead>
           <tbody>
             {(!products || products.length === 0) && (
               <tr>
-                <td colSpan={5} className="px-4 py-8 text-center text-[#8C8579]">
+                <td colSpan={6} className="px-4 py-8 text-center text-[#8C8579]">
                   Aucun produit pour l'instant.
                 </td>
               </tr>
@@ -57,9 +59,7 @@ export default async function ProductsPage() {
                   )}
                 </td>
                 <td className="px-4 py-3 text-[#181715]">{product.name}</td>
-                <td className="px-4 py-3 text-[#8C8579]">
-                  {product.categories?.name ?? "—"}
-                </td>
+                <td className="px-4 py-3 text-[#8C8579]">{product.categories?.name ?? "—"}</td>
                 <td className="px-4 py-3 text-[#181715]">
                   {Number(product.price).toLocaleString("fr-FR")} FCFA
                 </td>
@@ -74,11 +74,19 @@ export default async function ProductsPage() {
                     {product.is_active ? "Actif" : "Inactif"}
                   </span>
                 </td>
+                <td className="px-4 py-3 text-right">
+                  <Link
+                    href={`/produits/${product.id}`}
+                    className="text-xs text-[#00008B] hover:underline"
+                  >
+                    Modifier
+                  </Link>
+                </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
-    </main>
+    </AdminShell>
   );
 }
