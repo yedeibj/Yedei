@@ -62,6 +62,9 @@ export default function ProductForm({
   const [isDeleting, setIsDeleting] = useState(false);
   const [savedSlug, setSavedSlug] = useState<string | null>(null);
 
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "";
+  const productUrl = savedSlug ? siteUrl + "/produits/" + savedSlug : "";
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
@@ -134,7 +137,7 @@ export default function ProductForm({
   async function handleDelete() {
     if (!product?.id) return;
     const confirmed = window.confirm(
-      `Supprimer définitivement "${product.name}" ? Cette action est irréversible.`
+      "Supprimer definitivement ce produit ? Cette action est irreversible."
     );
     if (!confirmed) return;
 
@@ -146,28 +149,30 @@ export default function ProductForm({
     router.refresh();
   }
 
+  function copyLink() {
+    if (productUrl) {
+      navigator.clipboard.writeText(productUrl);
+    }
+  }
+
   return (
     <div className="mt-6 max-w-2xl">
       {savedSlug && (
         <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-md bg-[#E8F5E9] px-4 py-3 text-sm">
           <div>
-            <p className="font-medium text-[#006400]">Produit enregistré avec succès.</p>
+            <p className="font-medium text-[#006400]">Produit enregistre avec succes.</p>
             
-              href={`${process.env.NEXT_PUBLIC_SITE_URL}/produits/${savedSlug}`}
+              href={productUrl}
               target="_blank"
               rel="noopener noreferrer"
               className="text-[#00008B] underline"
             >
-              {process.env.NEXT_PUBLIC_SITE_URL}/produits/{savedSlug}
+              {productUrl}
             </a>
           </div>
           <button
             type="button"
-            onClick={() =>
-              navigator.clipboard.writeText(
-                `${process.env.NEXT_PUBLIC_SITE_URL}/produits/${savedSlug}`
-              )
-            }
+            onClick={copyLink}
             className="rounded-md border border-[#006400] px-3 py-1.5 text-xs uppercase tracking-wide text-[#006400] hover:bg-white"
           >
             Copier le lien
@@ -218,7 +223,7 @@ export default function ProductForm({
             </div>
             <div className="flex-1">
               <label className="block text-xs font-medium uppercase tracking-wide text-[#181715]">
-                Prix barré (promo, optionnel)
+                Prix barre (promo, optionnel)
               </label>
               <input
                 type="number"
@@ -230,7 +235,7 @@ export default function ProductForm({
             </div>
             <div className="flex-1">
               <label className="block text-xs font-medium uppercase tracking-wide text-[#181715]">
-                Catégorie
+                Categorie
               </label>
               <select
                 value={categoryId}
@@ -249,7 +254,7 @@ export default function ProductForm({
           <div className="flex flex-wrap gap-6">
             <label className="flex items-center gap-2 text-sm">
               <input type="checkbox" checked={isNew} onChange={(e) => setIsNew(e.target.checked)} />
-              Nouveauté
+              Nouveaute
             </label>
             <label className="flex items-center gap-2 text-sm">
               <input
@@ -284,7 +289,7 @@ export default function ProductForm({
             disabled={isSaving}
             className="rounded-md bg-[#006400] px-5 py-2 text-sm font-medium uppercase tracking-wide text-white transition-opacity hover:opacity-90 disabled:opacity-50"
           >
-            {isSaving ? "Enregistrement..." : isEditing ? "Enregistrer les modifications" : "Créer le produit"}
+            {isSaving ? "Enregistrement..." : isEditing ? "Enregistrer les modifications" : "Creer le produit"}
           </button>
 
           {isEditing && (
