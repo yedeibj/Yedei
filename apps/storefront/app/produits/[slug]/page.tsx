@@ -17,7 +17,7 @@ export default async function ProductPage({
   const { data: product } = await supabase
     .from("products")
     .select(
-      "id, name, description, price, compare_at_price, categories(name, slug), product_images(url, sort_order), product_variants(id, size, sku, stock)"
+      "id, name, description, price, compare_at_price, categories(name, slug), product_images(url, sort_order), product_variants(id, size, sku, stock, price)"
     )
     .eq("slug", slug)
     .eq("is_active", true)
@@ -33,6 +33,7 @@ export default async function ProductPage({
     size: v.size,
     sku: v.sku,
     stock: v.stock,
+    price: v.price !== null && v.price !== undefined ? Number(v.price) : null,
   }));
   const category = Array.isArray(product.categories) ? product.categories[0] : product.categories;
 
@@ -60,22 +61,12 @@ export default async function ProductPage({
         <div>
           <h1 className="font-display text-3xl italic text-[#181715]">{product.name}</h1>
 
-          <div className="mt-3 flex items-center gap-3">
-            <p className="text-xl text-[#181715]">
-              {Number(product.price).toLocaleString("fr-FR")} FCFA
-            </p>
-            {product.compare_at_price && (
-              <p className="text-sm text-[#8C8579] line-through">
-                {Number(product.compare_at_price).toLocaleString("fr-FR")} FCFA
-              </p>
-            )}
-          </div>
-
           <AddToCartPanel
             productId={product.id}
             slug={slug}
             name={product.name}
-            price={Number(product.price)}
+            basePrice={Number(product.price)}
+            compareAtPrice={product.compare_at_price ? Number(product.compare_at_price) : null}
             imageUrl={images[0]?.url}
             variants={variants}
           />
