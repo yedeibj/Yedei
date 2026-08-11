@@ -161,7 +161,7 @@ export default function ProductForm({
         <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-md bg-[#E8F5E9] px-4 py-3 text-sm">
           <div>
             <p className="font-medium text-[#006400]">Produit enregistre avec succes.</p>
-            
+            <a
               href={productUrl}
               target="_blank"
               rel="noopener noreferrer"
