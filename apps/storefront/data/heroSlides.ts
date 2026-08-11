@@ -30,7 +30,7 @@ export const heroSlides: HeroSlide[] = [
   },
   {
     id: "slide-enfant",
-    image: "/hero/slide-enfant.jpg",
+    image: "https://wrnzexenkzxemdwhatwr.supabase.co/storage/v1/object/public/hero/WhatsApp%20Image%202026-08-11%20at%2002.07.00.jpeg",
     eyebrow: "Collection Enfant",
     title: "Grandir avec style",
     description: "Confort et caractère, dès les premiers pas.",
