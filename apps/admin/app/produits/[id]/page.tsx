@@ -12,16 +12,41 @@ export default async function EditProductPage({
   const { id } = await params;
   const supabase = await createServerSupabaseClient();
 
-  const [{ data: product }, { data: categories }] = await Promise.all([
-    supabase
-      .from("products")
-      .select("id, name, description, price, category_id, is_new, is_best_seller, is_active")
-      .eq("id", id)
-      .single(),
-    supabase.from("categories").select("id, name").order("sort_order"),
-  ]);
+  const [{ data: product }, { data: categories }, { data: variants }, { data: images }] =
+    await Promise.all([
+      supabase
+        .from("products")
+        .select(
+          "id, name, description, price, compare_at_price, category_id, is_new, is_best_seller, is_active"
+        )
+        .eq("id", id)
+        .single(),
+      supabase.from("categories").select("id, name").order("sort_order"),
+      supabase
+        .from("product_variants")
+        .select("size, sku, price, stock")
+        .eq("product_id", id),
+      supabase
+        .from("product_images")
+        .select("url")
+        .eq("product_id", id)
+        .order("sort_order"),
+    ]);
 
   if (!product) notFound();
+
+  const initialVariants = (variants ?? []).map((v) => ({
+    key: crypto.randomUUID(),
+    size: v.size ?? "",
+    sku: v.sku ?? "",
+    price: v.price ? String(v.price) : "",
+    stock: v.stock ? String(v.stock) : "0",
+  }));
+
+  const initialImages = (images ?? []).map((img) => ({
+    path: img.url.split("/products/").pop() ?? "",
+    url: img.url,
+  }));
 
   return (
     <AdminShell>
@@ -32,7 +57,12 @@ export default async function EditProductPage({
         Modifier {product.name}
       </h1>
 
-      <ProductForm categories={categories ?? []} product={product} />
+      <ProductForm
+        categories={categories ?? []}
+        product={product}
+        initialVariants={initialVariants}
+        initialImages={initialImages}
+      />
     </AdminShell>
   );
 }
