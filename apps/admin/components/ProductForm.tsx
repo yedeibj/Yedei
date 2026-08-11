@@ -6,7 +6,7 @@ import { createClient as createBrowserSupabaseClient } from "@yedei/database/cli
 import VariantsEditor, { type VariantRow } from "./VariantsEditor";
 import ImageUploader, { type ImageEntry } from "./ImageUploader";
 
-type Category = { id: string; name: string };
+type Category = { id: string; name: string; parent_id: string | null };
 
 type ExistingProduct = {
   id: string;
@@ -27,6 +27,14 @@ function slugify(text: string) {
     .replace(/[\u0300-\u036f]/g, "")
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/(^-|-$)/g, "");
+}
+
+function buildCategoryGroups(categories: Category[]) {
+  const topLevel = categories.filter((c) => !c.parent_id);
+  return topLevel.map((parent) => ({
+    parent,
+    children: categories.filter((c) => c.parent_id === parent.id),
+  }));
 }
 
 export default function ProductForm({
@@ -64,6 +72,7 @@ export default function ProductForm({
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "";
   const productUrl = savedSlug ? siteUrl + "/produits/" + savedSlug : "";
+  const categoryGroups = buildCategoryGroups(categories);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -157,28 +166,15 @@ export default function ProductForm({
 
   return (
     <div className="mt-6 max-w-2xl">
-      {savedSlug && (
+      {savedSlug ? (
         <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-md bg-[#E8F5E9] px-4 py-3 text-sm">
           <div>
             <p className="font-medium text-[#006400]">Produit enregistre avec succes.</p>
-          <a
-              href={productUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-[#00008B] underline"
-            >
-              {productUrl}
-            </a>
+            <a href={productUrl} target="_blank" rel="noopener noreferrer" className="text-[#00008B] underline">{productUrl}</a>
           </div>
-          <button
-            type="button"
-            onClick={copyLink}
-            className="rounded-md border border-[#006400] px-3 py-1.5 text-xs uppercase tracking-wide text-[#006400] hover:bg-white"
-          >
-            Copier le lien
-          </button>
+          <button type="button" onClick={copyLink} className="rounded-md border border-[#006400] px-3 py-1.5 text-xs uppercase tracking-wide text-[#006400] hover:bg-white">Copier le lien</button>
         </div>
-      )}
+      ) : null}
 
       <form onSubmit={handleSubmit} className="space-y-8">
         <div className="space-y-5">
@@ -242,11 +238,22 @@ export default function ProductForm({
                 onChange={(e) => setCategoryId(e.target.value)}
                 className="mt-1 w-full rounded-md border border-[#D8D3C9] bg-white px-3 py-2 text-sm outline-none focus:border-[#006400]"
               >
-                {categories.map((cat) => (
-                  <option key={cat.id} value={cat.id}>
-                    {cat.name}
-                  </option>
-                ))}
+                {categoryGroups.map(({ parent, children }) =>
+                  children.length > 0 ? (
+                    <optgroup key={parent.id} label={parent.name}>
+                      <option value={parent.id}>{parent.name} (général)</option>
+                      {children.map((child) => (
+                        <option key={child.id} value={child.id}>
+                          {child.name}
+                        </option>
+                      ))}
+                    </optgroup>
+                  ) : (
+                    <option key={parent.id} value={parent.id}>
+                      {parent.name}
+                    </option>
+                  )
+                )}
               </select>
             </div>
           </div>
