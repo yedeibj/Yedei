@@ -1,7 +1,6 @@
 import { createClient as createServerSupabaseClient } from "@yedei/database/server";
 import Link from "next/link";
-import LogoutButton from "@/components/LogoutButton";
-
+import AdminShell from "@/components/AdminShell";
 
 export default async function AdminHomePage() {
   const supabase = await createServerSupabaseClient();
@@ -14,14 +13,8 @@ export default async function AdminHomePage() {
   ] = await Promise.all([
     supabase.from("products").select("*", { count: "exact", head: true }),
     supabase.from("categories").select("*", { count: "exact", head: true }),
-    supabase
-      .from("promotions")
-      .select("*", { count: "exact", head: true })
-      .eq("is_active", true),
-    supabase
-      .from("reviews")
-      .select("*", { count: "exact", head: true })
-      .eq("is_approved", false),
+    supabase.from("promotions").select("*", { count: "exact", head: true }).eq("is_active", true),
+    supabase.from("reviews").select("*", { count: "exact", head: true }).eq("is_approved", false),
   ]);
 
   const stats = [
@@ -32,54 +25,35 @@ export default async function AdminHomePage() {
   ];
 
   return (
-    <main className="min-h-screen bg-[#F6F3EC]">
-      <header className="flex items-center justify-between border-b border-[#D8D3C9] bg-white px-8 py-5">
-        <h1 className="font-display text-xl italic text-[#181715]">
-          YEDEI Admin
-        </h1>
-        <LogoutButton />
-      </header>
+    <AdminShell>
+      <h2 className="font-sans text-sm uppercase tracking-wide text-[#8C8579]">Aperçu</h2>
 
-      <div className="px-8 py-10">
+      <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {stats.map((stat) => (
+          <Link
+            key={stat.label}
+            href={stat.href}
+            className="rounded-lg bg-white p-6 shadow-sm transition-shadow hover:shadow-md"
+          >
+            <p className="text-3xl font-semibold text-[#181715]">{stat.value}</p>
+            <p className="mt-1 text-sm text-[#8C8579]">{stat.label}</p>
+          </Link>
+        ))}
+      </div>
+
+      <div className="mt-10">
         <h2 className="font-sans text-sm uppercase tracking-wide text-[#8C8579]">
-          Aperçu
+          Actions rapides
         </h2>
-
-        <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {stats.map((stat) => (
-            <Link
-              key={stat.label}
-              href={stat.href}
-              className="rounded-lg bg-white p-6 shadow-sm transition-shadow hover:shadow-md"
-            >
-              <p className="text-3xl font-semibold text-[#181715]">
-                {stat.value}
-              </p>
-              <p className="mt-1 text-sm text-[#8C8579]">{stat.label}</p>
-            </Link>
-          ))}
-        </div>
-
-        <div className="mt-10">
-          <h2 className="font-sans text-sm uppercase tracking-wide text-[#8C8579]">
-            Actions rapides
-          </h2>
-          <div className="mt-4 flex flex-wrap gap-3">
-            <Link
-              href="/produits/nouveau"
-              className="rounded-md bg-[#006400] px-4 py-2 text-sm font-medium uppercase tracking-wide text-white transition-opacity hover:opacity-90"
-            >
-              + Ajouter un produit
-            </Link>
-            <Link
-              href="/promotions/nouvelle"
-              className="rounded-md border border-[#DC143C] px-4 py-2 text-sm font-medium uppercase tracking-wide text-[#DC143C] transition-colors hover:bg-[#FDECEF]"
-            >
-              + Créer une promotion
-            </Link>
-          </div>
+        <div className="mt-4 flex flex-wrap gap-3">
+          <Link
+            href="/produits/nouveau"
+            className="rounded-md bg-[#006400] px-4 py-2 text-sm font-medium uppercase tracking-wide text-white hover:opacity-90"
+          >
+            + Ajouter un produit
+          </Link>
         </div>
       </div>
-    </main>
+    </AdminShell>
   );
 }
