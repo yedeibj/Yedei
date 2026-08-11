@@ -1,16 +1,17 @@
 import { createClient as createServerSupabaseClient } from "@yedei/database/server";
 import ProductForm from "@/components/ProductForm";
+import AdminShell from "@/components/AdminShell";
 import Link from "next/link";
 
 export default async function NewProductPage() {
   const supabase = await createServerSupabaseClient();
   const { data: categories } = await supabase
     .from("categories")
-    .select("id, name")
+    .select("id, name, parent_id")
     .order("sort_order");
 
   return (
-    <main className="min-h-screen bg-[#F6F3EC] px-8 py-10">
+    <AdminShell>
       <Link href="/produits" className="text-sm text-[#8C8579] hover:text-[#181715]">
         ← Retour aux produits
       </Link>
@@ -19,6 +20,6 @@ export default async function NewProductPage() {
       </h1>
 
       <ProductForm categories={categories ?? []} />
-    </main>
+    </AdminShell>
   );
 }
