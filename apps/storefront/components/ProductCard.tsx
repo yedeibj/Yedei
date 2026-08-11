@@ -24,7 +24,7 @@ export default function ProductCard({
           <img
             src={imageUrl}
             alt={name}
-            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+            className="h-full w-full object-contain transition-transform duration-500 group-hover:scale-105"
           />
         ) : (
           <div className="flex h-full items-center justify-center text-xs text-[#8C8579]">
