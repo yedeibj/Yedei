@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Fraunces, Manrope } from "next/font/google";
 import "./globals.css";
 import PromoBar from "@/components/PromoBar";
+import { CartProvider } from "@/lib/cart-context";
 
 const fraunces = Fraunces({
   subsets: ["latin"],
@@ -16,7 +17,9 @@ const manrope = Manrope({
   weight: ["400", "500", "600", "700"],
   display: "swap",
 });
+
 export const revalidate = 60;
+
 export const metadata: Metadata = {
   title: "YEDEI — L'élégance pour toute la famille",
   description:
@@ -32,7 +35,7 @@ export default function RootLayout({
     <html lang="fr" className={`${fraunces.variable} ${manrope.variable}`}>
       <body className="font-sans antialiased">
         <PromoBar />
-        {children}
+        <CartProvider>{children}</CartProvider>
       </body>
     </html>
   );
