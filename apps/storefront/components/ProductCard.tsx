@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Link from "next/link";
 
 type ProductCardProps = {
@@ -19,18 +18,13 @@ export default function ProductCard({
   isBestSeller,
 }: ProductCardProps) {
   return (
-    <Link
-      href={`/produits/${slug}`}
-      className="group w-[220px] flex-shrink-0 snap-start sm:w-[260px]"
-    >
+    <Link href={`/produits/${slug}`} className="group w-[220px] flex-shrink-0 snap-start sm:w-[260px]">
       <div className="relative aspect-[3/4] overflow-hidden rounded-md bg-[#F0EDE5]">
         {imageUrl ? (
-          <Image
+          <img
             src={imageUrl}
             alt={name}
-            fill
-            sizes="260px"
-            className="object-cover transition-transform duration-500 group-hover:scale-105"
+            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
           />
         ) : (
           <div className="flex h-full items-center justify-center text-xs text-[#8C8579]">
@@ -46,9 +40,7 @@ export default function ProductCard({
       </div>
 
       <p className="mt-3 font-sans text-sm text-[#181715]">{name}</p>
-      <p className="text-sm text-[#8C8579]">
-        {price.toLocaleString("fr-FR")} FCFA
-      </p>
+      <p className="text-sm text-[#8C8579]">{price.toLocaleString("fr-FR")} FCFA</p>
     </Link>
   );
 }
