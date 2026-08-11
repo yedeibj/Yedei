@@ -19,7 +19,7 @@ export default function ProductCard({
 }: ProductCardProps) {
   return (
     <Link href={`/produits/${slug}`} className="group w-[220px] flex-shrink-0 snap-start sm:w-[260px]">
-      <div className="relative aspect-[3/4] overflow-hidden rounded-md bg-[#F0EDE5]">
+      <div className="relative aspect-[3/4] overflow-hidden rounded-md bg-white">
         {imageUrl ? (
           <img
             src={imageUrl}
@@ -33,7 +33,7 @@ export default function ProductCard({
         )}
 
         {(isNew || isBestSeller) && (
-          <span className="absolute left-2 top-2 rounded-full bg-white/90 px-2 py-1 text-[10px] uppercase tracking-wide text-[#181715]">
+          <span className="absolute left-2 top-2 rounded-full bg-white/90 px-2 py-1 text-[10px] uppercase tracking-wide text-[#181715] shadow-sm">
             {isNew ? "Nouveau" : "Meilleure vente"}
           </span>
         )}
