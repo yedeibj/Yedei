@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
 import { createClient as createBrowserSupabaseClient } from "@yedei/database/client";
 
 export type ImageEntry = { path: string; url: string };
@@ -105,7 +104,7 @@ export default function ImageUploader({
         <div className="mt-4 grid grid-cols-3 gap-3 sm:grid-cols-4">
           {images.map((img, i) => (
             <div key={img.path} className="group relative aspect-square overflow-hidden rounded-md bg-[#F0EDE5]">
-              <Image src={img.url} alt="" fill sizes="150px" className="object-cover" />
+              <img src={img.url} alt="" className="h-full w-full object-cover" />
               {i === 0 && (
                 <span className="absolute left-1 top-1 rounded bg-white/90 px-1.5 py-0.5 text-[10px] text-[#181715]">
                   Principale
