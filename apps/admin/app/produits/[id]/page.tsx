@@ -21,7 +21,7 @@ export default async function EditProductPage({
         )
         .eq("id", id)
         .single(),
-      supabase.from("categories").select("id, name").order("sort_order"),
+      supabase.from("categories").select("id, name, parent_id").order("sort_order"),
       supabase
         .from("product_variants")
         .select("size, sku, price, stock")
