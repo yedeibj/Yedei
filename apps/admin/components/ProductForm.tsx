@@ -43,8 +43,6 @@ export default function ProductForm({
   const router = useRouter();
   const isEditing = Boolean(product);
 
-  // Génère l'ID tout de suite pour permettre l'upload d'images avant même
-  // que le produit soit enregistré (nécessaire pour le chemin de stockage).
   const [productId] = useState(() => product?.id ?? crypto.randomUUID());
 
   const [name, setName] = useState(product?.name ?? "");
@@ -62,6 +60,7 @@ export default function ProductForm({
   const [error, setError] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [savedSlug, setSavedSlug] = useState<string | null>(null);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -101,7 +100,6 @@ export default function ProductForm({
       return;
     }
 
-    // Variantes : on remplace tout (plus simple et fiable qu'un diff ligne à ligne)
     await supabase.from("product_variants").delete().eq("product_id", productId);
     if (variants.length > 0) {
       await supabase.from("product_variants").insert(
@@ -117,7 +115,6 @@ export default function ProductForm({
       );
     }
 
-    // Images : idem, on réécrit la liste dans l'ordre actuel
     await supabase.from("product_images").delete().eq("product_id", productId);
     if (images.length > 0) {
       await supabase.from("product_images").insert(
@@ -130,7 +127,7 @@ export default function ProductForm({
     }
 
     setIsSaving(false);
-    router.push("/produits");
+    setSavedSlug(slug);
     router.refresh();
   }
 
@@ -150,129 +147,158 @@ export default function ProductForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="mt-6 max-w-2xl space-y-8">
-      <div className="space-y-5">
-        <div>
-          <label className="block text-xs font-medium uppercase tracking-wide text-[#181715]">
-            Nom du produit
-          </label>
-          <input
-            type="text"
-            required
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className="mt-1 w-full rounded-md border border-[#D8D3C9] px-3 py-2 text-sm outline-none focus:border-[#006400]"
-          />
-        </div>
-
-        <div>
-          <label className="block text-xs font-medium uppercase tracking-wide text-[#181715]">
-            Description
-          </label>
-          <textarea
-            rows={4}
-            value={description ?? ""}
-            onChange={(e) => setDescription(e.target.value)}
-            className="mt-1 w-full rounded-md border border-[#D8D3C9] px-3 py-2 text-sm outline-none focus:border-[#006400]"
-          />
-        </div>
-
-        <div className="flex gap-4">
-          <div className="flex-1">
-            <label className="block text-xs font-medium uppercase tracking-wide text-[#181715]">
-              Prix de base (FCFA)
-            </label>
-            <input
-              type="number"
-              step="0.01"
-              required
-              value={price}
-              onChange={(e) => setPrice(e.target.value)}
-              className="mt-1 w-full rounded-md border border-[#D8D3C9] px-3 py-2 text-sm outline-none focus:border-[#006400]"
-            />
-          </div>
-          <div className="flex-1">
-            <label className="block text-xs font-medium uppercase tracking-wide text-[#181715]">
-              Prix barré (promo, optionnel)
-            </label>
-            <input
-              type="number"
-              step="0.01"
-              value={compareAtPrice}
-              onChange={(e) => setCompareAtPrice(e.target.value)}
-              className="mt-1 w-full rounded-md border border-[#D8D3C9] px-3 py-2 text-sm outline-none focus:border-[#006400]"
-            />
-          </div>
-          <div className="flex-1">
-            <label className="block text-xs font-medium uppercase tracking-wide text-[#181715]">
-              Catégorie
-            </label>
-            <select
-              value={categoryId}
-              onChange={(e) => setCategoryId(e.target.value)}
-              className="mt-1 w-full rounded-md border border-[#D8D3C9] bg-white px-3 py-2 text-sm outline-none focus:border-[#006400]"
+    <div className="mt-6 max-w-2xl">
+      {savedSlug && (
+        <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-md bg-[#E8F5E9] px-4 py-3 text-sm">
+          <div>
+            <p className="font-medium text-[#006400]">Produit enregistré avec succès.</p>
+            
+              href={`${process.env.NEXT_PUBLIC_SITE_URL}/produits/${savedSlug}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[#00008B] underline"
             >
-              {categories.map((cat) => (
-                <option key={cat.id} value={cat.id}>
-                  {cat.name}
-                </option>
-              ))}
-            </select>
+              {process.env.NEXT_PUBLIC_SITE_URL}/produits/{savedSlug}
+            </a>
           </div>
+          <button
+            type="button"
+            onClick={() =>
+              navigator.clipboard.writeText(
+                `${process.env.NEXT_PUBLIC_SITE_URL}/produits/${savedSlug}`
+              )
+            }
+            className="rounded-md border border-[#006400] px-3 py-1.5 text-xs uppercase tracking-wide text-[#006400] hover:bg-white"
+          >
+            Copier le lien
+          </button>
         </div>
+      )}
 
-        <div className="flex flex-wrap gap-6">
-          <label className="flex items-center gap-2 text-sm">
-            <input type="checkbox" checked={isNew} onChange={(e) => setIsNew(e.target.checked)} />
-            Nouveauté
-          </label>
-          <label className="flex items-center gap-2 text-sm">
+      <form onSubmit={handleSubmit} className="space-y-8">
+        <div className="space-y-5">
+          <div>
+            <label className="block text-xs font-medium uppercase tracking-wide text-[#181715]">
+              Nom du produit
+            </label>
             <input
-              type="checkbox"
-              checked={isBestSeller}
-              onChange={(e) => setIsBestSeller(e.target.checked)}
+              type="text"
+              required
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="mt-1 w-full rounded-md border border-[#D8D3C9] px-3 py-2 text-sm outline-none focus:border-[#006400]"
             />
-            Meilleure vente
-          </label>
-          {isEditing && (
+          </div>
+
+          <div>
+            <label className="block text-xs font-medium uppercase tracking-wide text-[#181715]">
+              Description
+            </label>
+            <textarea
+              rows={4}
+              value={description ?? ""}
+              onChange={(e) => setDescription(e.target.value)}
+              className="mt-1 w-full rounded-md border border-[#D8D3C9] px-3 py-2 text-sm outline-none focus:border-[#006400]"
+            />
+          </div>
+
+          <div className="flex gap-4">
+            <div className="flex-1">
+              <label className="block text-xs font-medium uppercase tracking-wide text-[#181715]">
+                Prix de base (FCFA)
+              </label>
+              <input
+                type="number"
+                step="0.01"
+                required
+                value={price}
+                onChange={(e) => setPrice(e.target.value)}
+                className="mt-1 w-full rounded-md border border-[#D8D3C9] px-3 py-2 text-sm outline-none focus:border-[#006400]"
+              />
+            </div>
+            <div className="flex-1">
+              <label className="block text-xs font-medium uppercase tracking-wide text-[#181715]">
+                Prix barré (promo, optionnel)
+              </label>
+              <input
+                type="number"
+                step="0.01"
+                value={compareAtPrice}
+                onChange={(e) => setCompareAtPrice(e.target.value)}
+                className="mt-1 w-full rounded-md border border-[#D8D3C9] px-3 py-2 text-sm outline-none focus:border-[#006400]"
+              />
+            </div>
+            <div className="flex-1">
+              <label className="block text-xs font-medium uppercase tracking-wide text-[#181715]">
+                Catégorie
+              </label>
+              <select
+                value={categoryId}
+                onChange={(e) => setCategoryId(e.target.value)}
+                className="mt-1 w-full rounded-md border border-[#D8D3C9] bg-white px-3 py-2 text-sm outline-none focus:border-[#006400]"
+              >
+                {categories.map((cat) => (
+                  <option key={cat.id} value={cat.id}>
+                    {cat.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap gap-6">
+            <label className="flex items-center gap-2 text-sm">
+              <input type="checkbox" checked={isNew} onChange={(e) => setIsNew(e.target.checked)} />
+              Nouveauté
+            </label>
             <label className="flex items-center gap-2 text-sm">
               <input
                 type="checkbox"
-                checked={isActive}
-                onChange={(e) => setIsActive(e.target.checked)}
+                checked={isBestSeller}
+                onChange={(e) => setIsBestSeller(e.target.checked)}
               />
-              Actif (visible sur le site)
+              Meilleure vente
             </label>
+            {isEditing && (
+              <label className="flex items-center gap-2 text-sm">
+                <input
+                  type="checkbox"
+                  checked={isActive}
+                  onChange={(e) => setIsActive(e.target.checked)}
+                />
+                Actif (visible sur le site)
+              </label>
+            )}
+          </div>
+        </div>
+
+        <VariantsEditor variants={variants} onChange={setVariants} />
+
+        <ImageUploader productId={productId} images={images} onChange={setImages} />
+
+        {error && <p className="text-sm text-[#DC143C]">{error}</p>}
+
+        <div className="flex items-center gap-4 border-t border-[#D8D3C9] pt-6">
+          <button
+            type="submit"
+            disabled={isSaving}
+            className="rounded-md bg-[#006400] px-5 py-2 text-sm font-medium uppercase tracking-wide text-white transition-opacity hover:opacity-90 disabled:opacity-50"
+          >
+            {isSaving ? "Enregistrement..." : isEditing ? "Enregistrer les modifications" : "Créer le produit"}
+          </button>
+
+          {isEditing && (
+            <button
+              type="button"
+              onClick={handleDelete}
+              disabled={isDeleting}
+              className="text-sm text-[#DC143C] hover:underline disabled:opacity-50"
+            >
+              {isDeleting ? "Suppression..." : "Supprimer ce produit"}
+            </button>
           )}
         </div>
-      </div>
-
-      <VariantsEditor variants={variants} onChange={setVariants} />
-
-      <ImageUploader productId={productId} images={images} onChange={setImages} />
-
-      {error && <p className="text-sm text-[#DC143C]">{error}</p>}
-
-      <div className="flex items-center gap-4 border-t border-[#D8D3C9] pt-6">
-        <button
-          type="submit"
-          disabled={isSaving}
-          className="rounded-md bg-[#006400] px-5 py-2 text-sm font-medium uppercase tracking-wide text-white transition-opacity hover:opacity-90 disabled:opacity-50"
-        >
-          {isSaving ? "Enregistrement..." : isEditing ? "Enregistrer les modifications" : "Créer le produit"}
-        </button>
-
-        {isEditing && (
-          <button
-            type="button"
-            onClick={handleDelete}
-            disabled={isDeleting}
-            className="text-sm text-[#DC143C] hover:underline disabled:opacity-50"
-          >
-            {isDeleting ? "Suppression..." : "Supprimer ce produit"}
-          </button>
-        )}
-      </div>
-    </form>
+      </form>
+    </div>
   );
 }
