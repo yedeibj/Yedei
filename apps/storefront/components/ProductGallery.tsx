@@ -14,7 +14,7 @@ export default function ProductGallery({
   const [activeIndex, setActiveIndex] = useState(0);
 
   if (images.length === 0) {
-    return <div className="aspect-[3/4] w-full rounded-md bg-[#F0EDE5]" />;
+    return <div className="aspect-[3/4] w-full rounded-md bg-white" />;
   }
 
   return (
@@ -26,8 +26,8 @@ export default function ProductGallery({
               key={img.url}
               type="button"
               onClick={() => setActiveIndex(i)}
-              className={`h-16 w-16 flex-shrink-0 overflow-hidden rounded-md border-2 bg-[#F0EDE5] transition-colors ${
-                i === activeIndex ? "border-[#006400]" : "border-transparent"
+              className={`h-16 w-16 flex-shrink-0 overflow-hidden rounded-md border-2 bg-white transition-colors ${
+                i === activeIndex ? "border-[#006400]" : "border-[#F0EDE5]"
               }`}
             >
               <img src={img.url} alt="" className="h-full w-full object-contain" />
@@ -36,7 +36,7 @@ export default function ProductGallery({
         </div>
       )}
 
-      <div className="aspect-[3/4] flex-1 overflow-hidden rounded-md bg-[#F0EDE5]">
+      <div className="aspect-[3/4] flex-1 overflow-hidden rounded-md border border-[#F0EDE5] bg-white">
         <img
           src={images[activeIndex].url}
           alt={productName}
