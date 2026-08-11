@@ -26,18 +26,22 @@ export default function ProductGallery({
               key={img.url}
               type="button"
               onClick={() => setActiveIndex(i)}
-              className={`h-16 w-16 flex-shrink-0 overflow-hidden rounded-md border-2 transition-colors ${
+              className={`h-16 w-16 flex-shrink-0 overflow-hidden rounded-md border-2 bg-[#F0EDE5] transition-colors ${
                 i === activeIndex ? "border-[#006400]" : "border-transparent"
               }`}
             >
-              <img src={img.url} alt="" className="h-full w-full object-cover" />
+              <img src={img.url} alt="" className="h-full w-full object-contain" />
             </button>
           ))}
         </div>
       )}
 
       <div className="aspect-[3/4] flex-1 overflow-hidden rounded-md bg-[#F0EDE5]">
-        <img src={images[activeIndex].url} alt={productName} className="h-full w-full object-cover" />
+        <img
+          src={images[activeIndex].url}
+          alt={productName}
+          className="h-full w-full object-contain"
+        />
       </div>
     </div>
   );
