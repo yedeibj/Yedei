@@ -1,5 +1,4 @@
 import { createClient as createServerSupabaseClient } from "@yedei/database/server";
-import Image from "next/image";
 import Link from "next/link";
 
 export default async function CategoryGrid() {
@@ -22,12 +21,10 @@ export default async function CategoryGrid() {
             className="group relative aspect-[3/4] overflow-hidden rounded-md bg-[#F0EDE5]"
           >
             {cat.image_url ? (
-              <Image
+              <img
                 src={cat.image_url}
                 alt={cat.name}
-                fill
-                sizes="(max-width: 640px) 50vw, 25vw"
-                className="object-cover transition-transform duration-500 group-hover:scale-105"
+                className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
               />
             ) : (
               <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
