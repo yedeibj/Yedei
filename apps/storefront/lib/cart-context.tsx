@@ -7,7 +7,9 @@ export type CartItem = {
   slug: string;
   name: string;
   price: number;
+  variantId: string;
   size: string;
+  variantLabel?: string;
   quantity: number;
   imageUrl?: string;
 };
@@ -15,8 +17,8 @@ export type CartItem = {
 type CartContextValue = {
   items: CartItem[];
   addItem: (item: CartItem) => void;
-  removeItem: (productId: string, size: string) => void;
-  updateQuantity: (productId: string, size: string, quantity: number) => void;
+  removeItem: (productId: string, variantId: string) => void;
+  updateQuantity: (productId: string, variantId: string, quantity: number) => void;
   clearCart: () => void;
   totalItems: number;
   totalPrice: number;
@@ -47,7 +49,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   function addItem(newItem: CartItem) {
     setItems((current) => {
       const existing = current.find(
-        (item) => item.productId === newItem.productId && item.size === newItem.size
+        (item) => item.productId === newItem.productId && item.variantId === newItem.variantId
       );
       if (existing) {
         return current.map((item) =>
@@ -58,16 +60,16 @@ export function CartProvider({ children }: { children: ReactNode }) {
     });
   }
 
-  function removeItem(productId: string, size: string) {
+  function removeItem(productId: string, variantId: string) {
     setItems((current) =>
-      current.filter((item) => !(item.productId === productId && item.size === size))
+      current.filter((item) => !(item.productId === productId && item.variantId === variantId))
     );
   }
 
-  function updateQuantity(productId: string, size: string, quantity: number) {
+  function updateQuantity(productId: string, variantId: string, quantity: number) {
     setItems((current) =>
       current.map((item) =>
-        item.productId === productId && item.size === size
+        item.productId === productId && item.variantId === variantId
           ? { ...item, quantity: Math.max(1, quantity) }
           : item
       )
