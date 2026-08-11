@@ -107,20 +107,21 @@ export default function HeroSlider() {
           </div>
         </div>
 
-        {/* Image */}
-        <div className="relative order-1 aspect-[4/5] w-full overflow-hidden bg-[#181715] sm:aspect-[3/4] lg:order-2 lg:aspect-auto lg:h-[85vh]">
-          {heroSlides.map((slide, i) => (
-            <img
-              key={slide.id}
-              src={slide.image}
-              alt=""
-              className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-1000 ease-out ${
-                i === index ? "opacity-100" : "opacity-0"
-              }`}
-              aria-hidden={i !== index}
-            />
-          ))}
-        </div>
+         {/* Image */}
+<div className="relative order-1 aspect-[9/16] w-full overflow-hidden bg-[#181715] sm:aspect-[3/4] lg:order-2 lg:aspect-auto lg:h-[85vh]">
+  {heroSlides.map((slide, i) => (
+    <img
+      key={slide.id}
+      src={slide.image}
+      alt=""
+      style={{ objectPosition: "center 20%" }}
+      className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-1000 ease-out ${
+        i === index ? "opacity-100" : "opacity-0"
+      }`}
+      aria-hidden={i !== index}
+    />
+  ))}
+</div>
       </div>
     </section>
   );
