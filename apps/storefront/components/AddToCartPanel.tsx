@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useCart } from "@/lib/cart-context";
 
-type Variant = { size: string; stock: number };
+type Variant = { id: string; size: string; sku: string | null; stock: number };
 
 export default function AddToCartPanel({
   productId,
@@ -21,15 +21,17 @@ export default function AddToCartPanel({
   variants: Variant[];
 }) {
   const { addItem } = useCart();
-  const [selectedSize, setSelectedSize] = useState<string | null>(
+  const [selectedVariantId, setSelectedVariantId] = useState<string | null>(
     variants.length === 0 ? "unique" : null
   );
   const [quantity, setQuantity] = useState(1);
   const [error, setError] = useState<string | null>(null);
   const [justAdded, setJustAdded] = useState(false);
 
+  const selectedVariant = variants.find((v) => v.id === selectedVariantId);
+
   function handleAddToCart() {
-    if (variants.length > 0 && !selectedSize) {
+    if (variants.length > 0 && !selectedVariantId) {
       setError("Choisis une taille avant d'ajouter au panier.");
       return;
     }
@@ -40,7 +42,9 @@ export default function AddToCartPanel({
       slug,
       name,
       price,
-      size: selectedSize ?? "unique",
+      variantId: selectedVariantId ?? "unique",
+      size: selectedVariant?.size ?? "Taille unique",
+      variantLabel: selectedVariant?.sku ?? undefined,
       quantity,
       imageUrl,
     });
@@ -57,29 +61,44 @@ export default function AddToCartPanel({
           <div className="mt-2 flex flex-wrap gap-2">
             {variants.map((v) => {
               const isOutOfStock = v.stock <= 0;
-              const isSelected = selectedSize === v.size;
+              const isSelected = selectedVariantId === v.id;
               return (
                 <button
-                  key={v.size}
+                  key={v.id}
                   type="button"
                   disabled={isOutOfStock}
                   onClick={() => {
-                    setSelectedSize(v.size);
+                    setSelectedVariantId(v.id);
                     setError(null);
                   }}
-                  className={`rounded-md border px-4 py-2 text-sm transition-colors ${
+                  className={`flex flex-col items-center rounded-md border px-4 py-2 text-sm transition-colors ${
                     isOutOfStock
-                      ? "cursor-not-allowed border-[#F0EDE5] text-[#D8D3C9] line-through"
+                      ? "cursor-not-allowed border-[#F0EDE5] text-[#D8D3C9]"
                       : isSelected
                       ? "border-[#006400] bg-[#E8F5E9] text-[#006400]"
                       : "border-[#D8D3C9] text-[#181715] hover:border-[#006400]"
                   }`}
                 >
-                  {v.size}
+                  <span className={isOutOfStock ? "line-through" : ""}>{v.size}</span>
+                  {v.sku && (
+                    <span className="text-[10px] text-[#8C8579]">{v.sku}</span>
+                  )}
                 </button>
               );
             })}
           </div>
+
+          {selectedVariant && (
+            <p className="mt-2 text-xs text-[#8C8579]">
+              Sélection : <span className="text-[#181715]">{selectedVariant.size}</span>
+              {selectedVariant.sku && (
+                <>
+                  {" — "}
+                  <span className="text-[#181715]">{selectedVariant.sku}</span>
+                </>
+              )}
+            </p>
+          )}
         </div>
       )}
 
