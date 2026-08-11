@@ -17,7 +17,7 @@ export default async function ProductPage({
   const { data: product } = await supabase
     .from("products")
     .select(
-      "id, name, description, price, compare_at_price, categories(name, slug), product_images(url, sort_order), product_variants(size, stock)"
+      "id, name, description, price, compare_at_price, categories(name, slug), product_images(url, sort_order), product_variants(id, size, sku, stock)"
     )
     .eq("slug", slug)
     .eq("is_active", true)
@@ -29,7 +29,9 @@ export default async function ProductPage({
     (a: any, b: any) => a.sort_order - b.sort_order
   );
   const variants = (product.product_variants ?? []).map((v: any) => ({
+    id: v.id,
     size: v.size,
+    sku: v.sku,
     stock: v.stock,
   }));
   const category = Array.isArray(product.categories) ? product.categories[0] : product.categories;
