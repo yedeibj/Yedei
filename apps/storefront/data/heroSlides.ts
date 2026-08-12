@@ -6,6 +6,7 @@ export type HeroSlide = {
   description: string;
   ctaLabel: string;
   ctaHref: string;
+  active?: boolean;
 };
 
 // ⚠️ Place tes images dans /public/hero/ (ex: slide-homme.jpg)
