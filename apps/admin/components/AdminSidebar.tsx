@@ -7,6 +7,7 @@ const links = [
   { href: "/", label: "Tableau de bord" },
   { href: "/produits", label: "Produits" },
   { href: "/categories", label: "Catégories" },
+  { label: "Hero (accueil)", href: "/hero" },
   { href: "/promotions", label: "Promotions" },
   { href: "/collection-saison", label: "Collection de saison" },
   { href: "/promo", label: "Barre promotionnelle" },
