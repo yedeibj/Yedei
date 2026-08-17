@@ -2,18 +2,25 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { heroSlides } from "@/data/heroSlides";
 
 const AUTOPLAY_MS = 6000;
 const THREAD_COLORS = ["#006400", "#dc143c", "#00008b"];
 
-export default function HeroSlider() {
-  const visibleSlides = heroSlides.filter((slide) => slide.active !== false);
+export type HeroSlide = {
+  id: string;
+  eyebrow: string | null;
+  title: string;
+  description: string | null;
+  cta_label: string | null;
+  cta_href: string | null;
+  image_url: string | null;
+};
 
+export default function HeroSlider({ slides }: { slides: HeroSlide[] }) {
   const [index, setIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const total = visibleSlides.length;
+  const total = slides.length;
 
   const goTo = useCallback(
     (nextIndex: number) => setIndex(((nextIndex % total) + total) % total),
@@ -34,7 +41,7 @@ export default function HeroSlider() {
 
   if (total === 0) return null;
 
-  const activeSlide = visibleSlides[index];
+  const activeSlide = slides[index];
 
   return (
     <section
@@ -47,28 +54,28 @@ export default function HeroSlider() {
       <div className="grid grid-cols-1 lg:grid-cols-2 lg:items-center">
         {/* Image, à gauche sur desktop */}
         <div className="relative order-1 px-6 pt-10 sm:px-12 lg:px-16 lg:py-16">
-          {/* Panneau décoratif en arrière-plan, décalé */}
           <div
             aria-hidden="true"
             className="absolute -bottom-4 -right-2 h-[92%] w-[92%] rounded-2xl bg-[#181715]/5 sm:-right-4"
           />
 
           <div className="relative aspect-[9/16] w-full overflow-hidden rounded-2xl bg-[#181715] shadow-xl sm:aspect-[3/4] lg:aspect-[4/5]">
-            {visibleSlides.map((slide, i) => (
-              <img
-                key={slide.id}
-                src={slide.image}
-                alt=""
-                style={{ objectPosition: "center 20%" }}
-                className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-1000 ease-out ${
-                  i === index ? "opacity-100" : "opacity-0"
-                }`}
-                aria-hidden={i !== index}
-              />
-            ))}
+            {slides.map((slide, i) =>
+              slide.image_url ? (
+                <img
+                  key={slide.id}
+                  src={slide.image_url}
+                  alt=""
+                  style={{ objectPosition: "center 20%" }}
+                  className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-1000 ease-out ${
+                    i === index ? "opacity-100" : "opacity-0"
+                  }`}
+                  aria-hidden={i !== index}
+                />
+              ) : null
+            )}
           </div>
 
-          {/* Repère Fil YEDEI, en coin de l'image */}
           <div className="absolute -bottom-3 left-9 flex items-center gap-2 rounded-full bg-white px-3 py-2 shadow-md sm:left-15">
             <span className="flex gap-[3px]" aria-hidden="true">
               <span className="h-[3px] w-[10px] rounded-full bg-[#006400]" />
@@ -89,20 +96,24 @@ export default function HeroSlider() {
           <h2 className="font-display text-3xl italic leading-tight text-[#181715] sm:text-4xl lg:text-5xl">
             {activeSlide.title}
           </h2>
-          <p className="mt-4 max-w-sm font-sans text-sm text-[#8C8579] sm:text-base">
-            {activeSlide.description}
-          </p>
-          <Link
-            href={activeSlide.ctaHref}
-            className="group mt-8 inline-flex w-fit items-center gap-2 font-sans text-sm uppercase tracking-[0.15em] text-[#181715]"
-          >
-            <span className="border-b border-[#181715]/40 pb-1 transition-colors group-hover:border-[#181715]">
-              {activeSlide.ctaLabel}
-            </span>
-            <span aria-hidden="true" className="transition-transform group-hover:translate-x-1">
-              →
-            </span>
-          </Link>
+          {activeSlide.description && (
+            <p className="mt-4 max-w-sm font-sans text-sm text-[#8C8579] sm:text-base">
+              {activeSlide.description}
+            </p>
+          )}
+          {activeSlide.cta_href && activeSlide.cta_label && (
+            <Link
+              href={activeSlide.cta_href}
+              className="group mt-8 inline-flex w-fit items-center gap-2 font-sans text-sm uppercase tracking-[0.15em] text-[#181715]"
+            >
+              <span className="border-b border-[#181715]/40 pb-1 transition-colors group-hover:border-[#181715]">
+                {activeSlide.cta_label}
+              </span>
+              <span aria-hidden="true" className="transition-transform group-hover:translate-x-1">
+                →
+              </span>
+            </Link>
+          )}
 
           {total > 1 && (
             <div className="mt-10 flex items-center gap-4">
@@ -115,7 +126,7 @@ export default function HeroSlider() {
                 ‹
               </button>
               <div className="flex items-center gap-2">
-                {visibleSlides.map((slide, i) => (
+                {slides.map((slide, i) => (
                   <button
                     key={slide.id}
                     type="button"
