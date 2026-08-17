@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import FilYedei from "./FilYedei";
+import CartIndicator from "./CartIndicator";
 import { categories } from "@/data/categories";
 
 const navLinks = categories.map((c) => ({ label: c.label, href: `/${c.slug}` }));
@@ -53,13 +54,9 @@ export default function Header() {
           >
             <UserIcon />
           </button>
-          <button
-            type="button"
-            aria-label="Voir le panier"
-            className="text-ink/80 transition-colors hover:text-ink"
-          >
-            <BagIcon />
-          </button>
+          <div className="text-ink/80 transition-colors hover:text-ink">
+            <CartIndicator />
+          </div>
           <button
             type="button"
             aria-label={menuOpen ? "Fermer le menu" : "Ouvrir le menu"}
@@ -119,15 +116,6 @@ function UserIcon() {
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
       <circle cx="12" cy="8" r="4" />
       <path d="M4 20c1.5-4 6-6 8-6s6.5 2 8 6" strokeLinecap="round" />
-    </svg>
-  );
-}
-
-function BagIcon() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-      <path d="M6 8h12l-1 12H7L6 8z" strokeLinejoin="round" />
-      <path d="M9 8V6a3 3 0 016 0v2" strokeLinecap="round" />
     </svg>
   );
 }
