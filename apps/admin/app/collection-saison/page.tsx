@@ -2,6 +2,7 @@ import { createClient as createServerSupabaseClient } from "@yedei/database/serv
 import { revalidatePath } from "next/cache";
 import AdminShell from "@/components/AdminShell";
 import ConfirmSubmitButton from "@/components/ConfirmSubmitButton";
+import ImageUrlUploader from "@/components/ImageUrlUploader";
 
 async function addEntry(formData: FormData) {
   "use server";
@@ -75,15 +76,7 @@ export default async function SeasonalCollectionPage() {
                     className="mt-1 w-full rounded-md border border-[#D8D3C9] px-2 py-1.5 text-sm outline-none focus:border-[#006400]"
                   />
                 </div>
-                <div>
-                  <label className="block text-[10px] uppercase tracking-wide text-[#8C8579]">URL image</label>
-                  <input
-                    name="image_url"
-                    defaultValue={entry.image_url ?? ""}
-                    placeholder="https://..."
-                    className="mt-1 w-full rounded-md border border-[#D8D3C9] px-2 py-1.5 text-sm outline-none focus:border-[#006400]"
-                  />
-                </div>
+                <ImageUrlUploader name="image_url" defaultValue={entry.image_url} />
               </div>
               <div>
                 <label className="block text-[10px] uppercase tracking-wide text-[#8C8579]">Description</label>
@@ -147,11 +140,7 @@ export default async function SeasonalCollectionPage() {
             rows={2}
             className="w-full rounded-md border border-[#D8D3C9] px-3 py-2 text-sm outline-none focus:border-[#006400]"
           />
-          <input
-            name="image_url"
-            placeholder="URL image (optionnel)"
-            className="w-full rounded-md border border-[#D8D3C9] px-3 py-2 text-sm outline-none focus:border-[#006400]"
-          />
+          <ImageUrlUploader name="image_url" />
           <input
             name="link_href"
             placeholder="Lien bouton (ex: /collections/enfant)"
