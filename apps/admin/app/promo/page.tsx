@@ -1,5 +1,6 @@
 import { createClient as createServerSupabaseClient } from "@yedei/database/server";
 import { revalidatePath } from "next/cache";
+import AdminShell from "@/components/AdminShell";
 
 async function addMessage(formData: FormData) {
   "use server";
@@ -33,7 +34,7 @@ export default async function PromoMessagesPage() {
     .order("sort_order");
 
   return (
-    <main className="min-h-screen bg-[#F6F3EC] px-8 py-10">
+    <AdminShell>
       <h1 className="font-display text-2xl italic text-[#181715]">
         Barre promotionnelle
       </h1>
@@ -103,6 +104,6 @@ export default async function PromoMessagesPage() {
           </tbody>
         </table>
       </div>
-    </main>
+    </AdminShell>
   );
 }
