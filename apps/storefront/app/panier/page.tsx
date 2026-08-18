@@ -74,6 +74,13 @@ export default function CartPage() {
               <p className="text-sm font-medium text-[#181715]">Total</p>
               <p className="text-lg text-[#181715]">{totalPrice.toLocaleString("fr-FR")} FCFA</p>
             </div>
+
+            <Link
+              href="/commande"
+              className="block w-full rounded-md bg-[#006400] py-3 text-center text-sm font-medium uppercase tracking-wide text-white transition-opacity hover:opacity-90 sm:w-auto sm:px-10"
+            >
+              Passer la commande
+            </Link>
           </div>
         )}
       </div>
