@@ -2,6 +2,7 @@ import { createClient as createServerSupabaseClient } from "@yedei/database/serv
 import Header from "@/components/Header";
 import HeroSlider from "@/components/HeroSlider";
 import CategoryGrid from "@/components/CategoryGrid";
+import SeasonalBanner from "@/components/SeasonalBanner";
 import CategoryProducts from "@/components/CategoryProducts";
 import NewArrivals from "@/components/NewArrivals";
 import BestSellers from "@/components/BestSellers";
@@ -21,6 +22,7 @@ export default async function HomePage() {
       <Header />
       <HeroSlider slides={slides ?? []} />
       <CategoryGrid />
+      <SeasonalBanner />
       <CategoryProducts categorySlug="homme" title="Collection Homme" />
       <CategoryProducts categorySlug="femme" title="Collection Femme" />
       <CategoryProducts categorySlug="enfant" title="Collection Enfant" />
