@@ -84,7 +84,7 @@ export default function VariantsEditor({
             <thead className="border-b border-[#D8D3C9] bg-[#F6F3EC] uppercase tracking-wide text-[#8C8579]">
               <tr>
                 <th className="px-3 py-2">Taille</th>
-                <th className="px-3 py-2">Code (SKU)</th>
+                <th className="px-3 py-2">Âge / Code</th>
                 <th className="px-3 py-2">Prix (si différent)</th>
                 <th className="px-3 py-2">Stock</th>
                 <th className="px-3 py-2"></th>
@@ -106,7 +106,7 @@ export default function VariantsEditor({
                       type="text"
                       value={v.sku}
                       onChange={(e) => updateRow(v.key, "sku", e.target.value)}
-                      placeholder="YED-CHM-38"
+                      placeholder="Ex: 6-7 ans"
                       className="w-28 rounded border border-[#D8D3C9] px-2 py-1"
                     />
                   </td>
