@@ -37,6 +37,8 @@ export default async function OrdersPage({
 
   const { data: orders } = await query;
 
+  const statusEntries = Object.entries(STATUS_LABELS);
+
   return (
     <AdminShell>
       <h1 className="font-display text-2xl italic text-[#181715]">Commandes</h1>
@@ -45,16 +47,30 @@ export default async function OrdersPage({
       </p>
 
       <div className="mt-6 flex flex-wrap gap-2 text-xs uppercase tracking-wide">
-        <a href="/commandes" className={`rounded-full px-3 py-1.5 ${!filtre || filtre === "toutes" ? "bg-[#181715] text-white" : "border border-[#D8D3C9] text-[#181715]"}`}>Toutes</a>
-        {Object.entries(STATUS_LABELS).map(([value, label]) => (
-          
-            key={value}
-            href={`/commandes?filtre=${value}`}
-            className={`rounded-full px-3 py-1.5 ${filtre === value ? "bg-[#181715] text-white" : "border border-[#D8D3C9] text-[#181715]"}`}
-          >
-            {label}
-          </a>
-        ))}
+        
+          href="/commandes"
+          className={
+            !filtre || filtre === "toutes"
+              ? "rounded-full bg-[#181715] px-3 py-1.5 text-white"
+              : "rounded-full border border-[#D8D3C9] px-3 py-1.5 text-[#181715]"
+          }
+        >
+          Toutes
+        </a>
+        {statusEntries.map((entry) => {
+          const value = entry[0];
+          const label = entry[1];
+          const isActive = filtre === value;
+          const linkHref = "/commandes?filtre=" + value;
+          const linkClass = isActive
+            ? "rounded-full bg-[#181715] px-3 py-1.5 text-white"
+            : "rounded-full border border-[#D8D3C9] px-3 py-1.5 text-[#181715]";
+          return (
+            <a key={value} href={linkHref} className={linkClass}>
+              {label}
+            </a>
+          );
+        })}
       </div>
 
       <div className="mt-6 space-y-4">
@@ -69,18 +85,20 @@ export default async function OrdersPage({
                   </span>
                 </p>
                 <p className="text-xs text-[#8C8579]">
-                  {order.phone}{order.email ? ` · ${order.email}` : ""}
+                  {order.phone}{order.email ? " · " + order.email : ""}
                 </p>
                 <p className="text-xs text-[#8C8579]">
-                  {order.address}{order.city ? `, ${order.city}` : ""}
+                  {order.address}{order.city ? ", " + order.city : ""}
                 </p>
-                {order.notes && <p className="mt-1 text-xs italic text-[#8C8579]">"{order.notes}"</p>}
+                {order.notes && (
+                  <p className="mt-1 text-xs italic text-[#8C8579]">{order.notes}</p>
+                )}
               </div>
               <div className="flex flex-col items-end gap-1">
-                <span className={`rounded-full px-2 py-1 text-[10px] uppercase tracking-wide ${STATUS_COLORS[order.status] ?? ""}`}>
+                <span className={"rounded-full px-2 py-1 text-[10px] uppercase tracking-wide " + (STATUS_COLORS[order.status] ?? "")}>
                   {STATUS_LABELS[order.status] ?? order.status}
                 </span>
-                <span className={`rounded-full px-2 py-1 text-[10px] uppercase tracking-wide ${order.payment_status === "paye" ? "bg-[#E8F5E9] text-[#006400]" : "bg-[#FDECEF] text-[#DC143C]"}`}>
+                <span className={"rounded-full px-2 py-1 text-[10px] uppercase tracking-wide " + (order.payment_status === "paye" ? "bg-[#E8F5E9] text-[#006400]" : "bg-[#FDECEF] text-[#DC143C]")}>
                   {order.payment_status === "paye" ? "Payé" : "Non payé"}
                 </span>
               </div>
@@ -91,8 +109,8 @@ export default async function OrdersPage({
                 <div key={i} className="flex items-center justify-between text-xs text-[#181715]">
                   <span>
                     {item.product_name}
-                    {item.variant_size ? ` — ${item.variant_size}` : ""}
-                    {item.variant_label ? ` (${item.variant_label})` : ""} × {item.quantity}
+                    {item.variant_size ? " — " + item.variant_size : ""}
+                    {item.variant_label ? " (" + item.variant_label + ")" : ""} × {item.quantity}
                   </span>
                   <span>{(item.unit_price * item.quantity).toLocaleString("fr-FR")} FCFA</span>
                 </div>
