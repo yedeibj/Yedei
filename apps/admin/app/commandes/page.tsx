@@ -47,7 +47,7 @@ export default async function OrdersPage({
       </p>
 
       <div className="mt-6 flex flex-wrap gap-2 text-xs uppercase tracking-wide">
-        
+        <a
           href="/commandes"
           className={
             !filtre || filtre === "toutes"
