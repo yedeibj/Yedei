@@ -2,7 +2,7 @@ import { createClient as createServerSupabaseClient } from "@yedei/database/serv
 import { revalidatePath } from "next/cache";
 import AdminShell from "@/components/AdminShell";
 import ConfirmSubmitButton from "@/components/ConfirmSubmitButton";
-import ImageUploader from '@/components/ImageUploader';
+import ImageUrlUploader from "@/components/ImageUrlUploader";
 
 async function addEntry(formData: FormData) {
   "use server";
