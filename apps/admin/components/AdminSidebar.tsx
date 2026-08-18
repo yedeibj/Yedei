@@ -11,6 +11,7 @@ const links = [
   { href: "/promotions", label: "Promotions" },
   { href: "/collection-saison", label: "Collection de saison" },
   { href: "/promo", label: "Barre promotionnelle" },
+  { label: "Commandes", href: "/commandes" },
   { href: "/avis", label: "Avis clients" },
 ];
 
