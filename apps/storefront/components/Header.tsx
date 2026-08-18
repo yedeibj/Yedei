@@ -6,7 +6,7 @@ import FilYedei from "./FilYedei";
 import CartIndicator from "./CartIndicator";
 import { categories } from "@/data/categories";
 
-const navLinks = categories.map((c) => ({ label: c.label, href: `/${c.slug}` }));
+const navLinks = categories.map((c) => ({ label: c.label, href: `/collections/${c.slug}` }));
 
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
