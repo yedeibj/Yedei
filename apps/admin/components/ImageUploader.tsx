@@ -9,7 +9,7 @@ export default function ImageUploader({
   productId,
   images,
   onChange,
-}: {
+}: { 
   productId: string;
   images: ImageEntry[];
   onChange: (images: ImageEntry[]) => void;
