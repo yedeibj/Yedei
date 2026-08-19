@@ -1,40 +1,36 @@
-import Image from "next/image";
-import FilYedei from "./FilYedei";
+import { createClient as createServerSupabaseClient } from "@yedei/database/server";
+import Header from "@/components/Header";
+import HeroSlider from "@/components/HeroSlider";
+import CategoryGrid from "@/components/CategoryGrid";
+import NewArrivals from "@/components/NewArrivals";
+import BestSellers from "@/components/BestSellers";
+import SeasonalBanner from "@/components/SeasonalBanner";
+import CategoryProducts from "@/components/CategoryProducts";
+import BrandStory from "@/components/BrandStory";
+import Footer from "@/components/Footer";
 
-export default function BrandStory() {
+export default async function HomePage() {
+  const supabase = await createServerSupabaseClient();
+  const { data: slides } = await supabase
+    .from("hero_slides")
+    .select("id, eyebrow, title, description, cta_label, cta_href, image_url")
+    .eq("is_active", true)
+    .order("sort_order");
+
   return (
-    <section className="bg-sand">
-      <div className="mx-auto grid max-w-container items-center gap-12 px-6 py-20 md:grid-cols-2 md:px-10 md:py-28">
-        <div className="relative aspect-[4/5] w-full">
-          <div className="absolute -inset-3 hidden border border-yedei-blue/20 md:block" />
-          <div className="relative h-full w-full overflow-hidden">
-            <Image
-              src="https://picsum.photos/seed/yedei-story/1000/1250"
-              alt="L'atelier YEDEI, savoir-faire familial"
-              fill
-              sizes="(min-width: 768px) 45vw, 100vw"
-              className="object-cover"
-            />
-          </div>
-        </div>
-
-        <div>
-          <FilYedei />
-          <h2 className="mt-6 font-display text-3xl italic leading-tight text-ink sm:text-4xl">
-            Une maison familiale, née à Cotonou
-          </h2>
-          <p className="mt-6 max-w-lg text-base leading-relaxed text-ink/70">
-            YEDEI est née d&apos;une conviction simple : chaque génération
-            d&apos;une même famille mérite des vêtements pensés avec la même
-            exigence. Des matières choisies avec soin, des finitions
-            irréprochables et une attention portée à chaque silhouette,
-            du nouveau-né au grand-parent.
-          </p>
-          <p className="mt-4 max-w-lg font-display text-xl italic text-ink/80">
-            &laquo; La qualité ne se discute pas, elle se porte. &raquo;
-          </p>
-        </div>
-      </div>
-    </section>
+    <main>
+      <Header />
+      <HeroSlider slides={slides ?? []} />
+      <CategoryGrid />
+      <NewArrivals />
+      <BestSellers />
+      <SeasonalBanner />
+      <CategoryProducts categorySlug="homme" title="Collection Homme" />
+      <CategoryProducts categorySlug="femme" title="Collection Femme" />
+      <CategoryProducts categorySlug="enfant" title="Collection Enfant" />
+      <CategoryProducts categorySlug="bebe" title="Collection Bébé" />
+      <BrandStory />
+      <Footer />
+    </main>
   );
 }
