@@ -5,7 +5,7 @@ export default async function SeasonalBanner() {
   const supabase = await createServerSupabaseClient();
   const { data: entries } = await supabase
     .from("seasonal_collection")
-    .select("id, title, description, image_url, link_href")
+    .select("id, title, description, image_url, image_position, link_href")
     .eq("is_active", true);
 
   if (!entries || entries.length === 0) return null;
@@ -16,12 +16,13 @@ export default async function SeasonalBanner() {
         {entries.map((entry) => (
           <div
             key={entry.id}
-            className="relative flex min-h-[280px] items-center overflow-hidden rounded-2xl bg-[#181715] sm:min-h-[380px]"
+            className="relative flex aspect-[4/5] items-end overflow-hidden rounded-2xl bg-[#181715] sm:aspect-[16/9] sm:items-center lg:aspect-[21/9]"
           >
             {entry.image_url ? (
               <img
                 src={entry.image_url}
                 alt=""
+                style={{ objectPosition: entry.image_position || "center" }}
                 className="absolute inset-0 h-full w-full object-cover opacity-70"
               />
             ) : (
