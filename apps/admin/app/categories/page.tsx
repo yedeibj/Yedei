@@ -2,6 +2,7 @@ import { createClient as createServerSupabaseClient } from "@yedei/database/serv
 import { revalidatePath } from "next/cache";
 import AdminShell from "@/components/AdminShell";
 import ConfirmSubmitButton from "@/components/ConfirmSubmitButton";
+import ImageUrlUploader from "@/components/ImageUrlUploader";
 
 function slugify(text: string) {
   return text
@@ -65,68 +66,68 @@ function CategoryEditForm({
   isChild?: boolean;
 }) {
   return (
-    <div className={`flex flex-wrap items-end gap-3 p-4 ${isChild ? "border-t border-[#D8D3C9]/60" : ""}`}>
-      <form action={updateCategory} className="flex flex-wrap items-end gap-3">
+    <div className={isChild ? "border-t border-[#D8D3C9]/60 p-4" : "p-4"}>
+      <form action={updateCategory} className="space-y-3">
         <input type="hidden" name="id" value={category.id} />
-        <div>
-          <label className="block text-[10px] uppercase tracking-wide text-[#8C8579]">Nom</label>
-          <input
-            name="name"
-            defaultValue={category.name}
-            required
-            className="mt-1 w-40 rounded-md border border-[#D8D3C9] px-2 py-1.5 text-sm outline-none focus:border-[#006400]"
-          />
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <div>
+            <label className="block text-[10px] uppercase tracking-wide text-[#8C8579]">Nom</label>
+            <input
+              name="name"
+              defaultValue={category.name}
+              required
+              className="mt-1 w-full rounded-md border border-[#D8D3C9] px-2 py-1.5 text-sm outline-none focus:border-[#006400]"
+            />
+          </div>
+          <div>
+            <label className="block text-[10px] uppercase tracking-wide text-[#8C8579]">Parent</label>
+            <select
+              name="parent_id"
+              defaultValue={category.parent_id ?? ""}
+              className="mt-1 w-full rounded-md border border-[#D8D3C9] bg-white px-2 py-1.5 text-sm outline-none focus:border-[#006400]"
+            >
+              <option value="">Catégorie principale</option>
+              {parentOptions
+                .filter((p) => p.id !== category.id)
+                .map((p) => (
+                  <option key={p.id} value={p.id}>
+                    Sous-catégorie de {p.name}
+                  </option>
+                ))}
+            </select>
+          </div>
         </div>
-        <div>
-          <label className="block text-[10px] uppercase tracking-wide text-[#8C8579]">Parent</label>
-          <select
-            name="parent_id"
-            defaultValue={category.parent_id ?? ""}
-            className="mt-1 w-44 rounded-md border border-[#D8D3C9] bg-white px-2 py-1.5 text-sm outline-none focus:border-[#006400]"
+
+        <ImageUrlUploader name="image_url" defaultValue={category.image_url} bucket="hero" />
+
+        <div className="flex items-center justify-between pt-1">
+          <div>
+            <label className="block text-[10px] uppercase tracking-wide text-[#8C8579]">Ordre</label>
+            <input
+              name="sort_order"
+              type="number"
+              defaultValue={category.sort_order}
+              className="mt-1 w-20 rounded-md border border-[#D8D3C9] px-2 py-1.5 text-sm outline-none focus:border-[#006400]"
+            />
+          </div>
+          <button
+            type="submit"
+            className="rounded-md bg-[#006400] px-4 py-1.5 text-xs font-medium uppercase tracking-wide text-white hover:opacity-90"
           >
-            <option value="">Catégorie principale</option>
-            {parentOptions
-              .filter((p) => p.id !== category.id)
-              .map((p) => (
-                <option key={p.id} value={p.id}>
-                  Sous-catégorie de {p.name}
-                </option>
-              ))}
-          </select>
+            Enregistrer
+          </button>
         </div>
-        <div>
-          <label className="block text-[10px] uppercase tracking-wide text-[#8C8579]">URL image</label>
-          <input
-            name="image_url"
-            defaultValue={category.image_url ?? ""}
-            placeholder="https://..."
-            className="mt-1 w-48 rounded-md border border-[#D8D3C9] px-2 py-1.5 text-sm outline-none focus:border-[#006400]"
-          />
-        </div>
-        <div>
-          <label className="block text-[10px] uppercase tracking-wide text-[#8C8579]">Ordre</label>
-          <input
-            name="sort_order"
-            type="number"
-            defaultValue={category.sort_order}
-            className="mt-1 w-20 rounded-md border border-[#D8D3C9] px-2 py-1.5 text-sm outline-none focus:border-[#006400]"
-          />
-        </div>
-        <button
-          type="submit"
-          className="rounded-md bg-[#006400] px-3 py-1.5 text-xs font-medium uppercase tracking-wide text-white hover:opacity-90"
-        >
-          Enregistrer
-        </button>
       </form>
 
-      <ConfirmSubmitButton
-        action={deleteCategory}
-        hiddenFields={{ id: category.id }}
-        confirmMessage={`Supprimer "${category.name}" ? Les produits associés perdront leur catégorie.`}
-        label="Supprimer"
-        className="rounded-md border border-[#DC143C] px-3 py-1.5 text-xs uppercase tracking-wide text-[#DC143C] hover:bg-[#FDECEF]"
-      />
+      <div className="mt-2 flex justify-end">
+        <ConfirmSubmitButton
+          action={deleteCategory}
+          hiddenFields={{ id: category.id }}
+          confirmMessage={`Supprimer "${category.name}" ? Les produits associés perdront leur catégorie.`}
+          label="Supprimer"
+          className="text-xs text-[#DC143C] hover:underline"
+        />
+      </div>
     </div>
   );
 }
@@ -145,7 +146,8 @@ export default async function CategoriesPage() {
     <AdminShell>
       <h1 className="font-display text-2xl italic text-[#181715]">Catégories</h1>
       <p className="mt-1 text-sm text-[#8C8579]">
-        Catégories principales et sous-catégories (ex : Enfant → Fille / Garçon).
+        Les 4 images ici sont celles affichées sur la page d'accueil (Homme / Femme / Enfant / Bébé).
+        Les sous-catégories (Fille / Garçon) n'apparaissent pas sur l'accueil, seulement sur leur page dédiée.
       </p>
 
       <div className="mt-8 space-y-6">
@@ -185,11 +187,7 @@ export default async function CategoriesPage() {
               </option>
             ))}
           </select>
-          <input
-            name="image_url"
-            placeholder="URL image (optionnel)"
-            className="w-full rounded-md border border-[#D8D3C9] px-3 py-2 text-sm outline-none focus:border-[#006400]"
-          />
+          <ImageUrlUploader name="image_url" bucket="hero" />
           <input
             name="sort_order"
             type="number"
