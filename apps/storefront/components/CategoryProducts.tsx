@@ -4,9 +4,11 @@ import ProductRail from "./ProductRail";
 export default async function CategoryProducts({
   categorySlug,
   title,
+  subtitle,
 }: {
   categorySlug: string;
   title: string;
+  subtitle?: string;
 }) {
   const supabase = await createServerSupabaseClient();
 
@@ -29,6 +31,7 @@ export default async function CategoryProducts({
   return (
     <ProductRail
       title={title}
+      subtitle={subtitle}
       seeAllHref={`/collections/${categorySlug}`}
       products={products ?? []}
     />
