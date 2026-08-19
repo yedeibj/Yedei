@@ -12,5 +12,11 @@ export default async function BestSellers() {
     .order("created_at", { ascending: false })
     .limit(12);
 
-  return <ProductRail title="Meilleures ventes" products={products ?? []} />;
+  return (
+    <ProductRail
+      title="Meilleures ventes"
+      subtitle="Les favoris de nos clientes et clients"
+      products={products ?? []}
+    />
+  );
 }
