@@ -12,5 +12,11 @@ export default async function NewArrivals() {
     .order("created_at", { ascending: false })
     .limit(12);
 
-  return <ProductRail title="Nouveautés" products={products ?? []} />;
+  return (
+    <ProductRail
+      title="Nouveautés"
+      subtitle="Les dernières pièces à découvrir en premier"
+      products={products ?? []}
+    />
+  );
 }
