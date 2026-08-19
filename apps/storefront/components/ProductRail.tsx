@@ -13,17 +13,21 @@ type Product = {
 
 type ProductRailProps = {
   title: string;
+  subtitle?: string;
   seeAllHref?: string;
   products: Product[];
 };
 
-export default function ProductRail({ title, seeAllHref, products }: ProductRailProps) {
+export default function ProductRail({ title, subtitle, seeAllHref, products }: ProductRailProps) {
   if (!products || products.length === 0) return null;
 
   return (
     <section className="px-6 py-12 sm:px-12">
       <div className="mb-6 flex items-end justify-between">
-        <h2 className="font-display text-2xl italic text-[#181715]">{title}</h2>
+        <div>
+          <h2 className="font-display text-2xl italic text-[#181715]">{title}</h2>
+          {subtitle && <p className="mt-1 text-sm text-[#8C8579]">{subtitle}</p>}
+        </div>
         {seeAllHref && (
           <Link
             href={seeAllHref}
