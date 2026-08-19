@@ -2,10 +2,10 @@ import { createClient as createServerSupabaseClient } from "@yedei/database/serv
 import Header from "@/components/Header";
 import HeroSlider from "@/components/HeroSlider";
 import CategoryGrid from "@/components/CategoryGrid";
+import SectionIntro from "@/components/SectionIntro";
 import NewArrivals from "@/components/NewArrivals";
 import BestSellers from "@/components/BestSellers";
 import SeasonalBanner from "@/components/SeasonalBanner";
-import SectionIntro from "@/components/SectionIntro";
 import CategoryProducts from "@/components/CategoryProducts";
 import BrandStory from "@/components/BrandStory";
 import Footer from "@/components/Footer";
@@ -23,14 +23,15 @@ export default async function HomePage() {
       <Header />
       <HeroSlider slides={slides ?? []} />
       <CategoryGrid />
+
+      <SectionIntro sectionKey="nouveautes" />
       <NewArrivals />
       <BestSellers />
+
+      <SectionIntro sectionKey="saison" />
       <SeasonalBanner />
 
-      <SectionIntro
-        title="Explorez chaque collection"
-        description="Des tenues pensées pour chaque membre de la famille, du premier âge à l'âge adulte."
-      />
+      <SectionIntro sectionKey="collections" />
       <CategoryProducts
         categorySlug="homme"
         title="Collection Homme"
