@@ -10,6 +10,7 @@ const links = [
   { label: "Hero (accueil)", href: "/hero" },
   { href: "/promotions", label: "Promotions" },
   { href: "/collection-saison", label: "Collection de saison" },
+  { label: "Textes accueil", href: "/textes-accueil" },
   { href: "/promo", label: "Barre promotionnelle" },
   { label: "Commandes", href: "/commandes" },
   { href: "/avis", label: "Avis clients" },
