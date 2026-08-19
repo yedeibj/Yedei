@@ -20,10 +20,17 @@ export default async function CategoryProducts({
 
   if (!category) return null;
 
+  const { data: children } = await supabase
+    .from("categories")
+    .select("id")
+    .eq("parent_id", category.id);
+
+  const categoryIds = [category.id, ...(children ?? []).map((c) => c.id)];
+
   const { data: products } = await supabase
     .from("products")
     .select("id, slug, name, price, is_new, is_best_seller, product_images(url)")
-    .eq("category_id", category.id)
+    .in("category_id", categoryIds)
     .eq("is_active", true)
     .order("created_at", { ascending: false })
     .limit(12);
