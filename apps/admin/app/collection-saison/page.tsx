@@ -13,6 +13,7 @@ async function addEntry(formData: FormData) {
     title,
     description: String(formData.get("description") ?? "").trim() || null,
     image_url: String(formData.get("image_url") ?? "").trim() || null,
+    image_position: String(formData.get("image_position") ?? "center"),
     link_href: String(formData.get("link_href") ?? "").trim() || null,
     is_active: formData.get("is_active") === "on",
   });
@@ -31,6 +32,7 @@ async function updateEntry(formData: FormData) {
       title,
       description: String(formData.get("description") ?? "").trim() || null,
       image_url: String(formData.get("image_url") ?? "").trim() || null,
+      image_position: String(formData.get("image_position") ?? "center"),
       link_href: String(formData.get("link_href") ?? "").trim() || null,
       is_active: formData.get("is_active") === "on",
     })
@@ -51,7 +53,7 @@ export default async function SeasonalCollectionPage() {
   const supabase = await createServerSupabaseClient();
   const { data: entries } = await supabase
     .from("seasonal_collection")
-    .select("id, title, description, image_url, link_href, is_active")
+    .select("id, title, description, image_url, image_position, link_href, is_active")
     .order("title");
 
   return (
@@ -87,14 +89,30 @@ export default async function SeasonalCollectionPage() {
                   className="mt-1 w-full rounded-md border border-[#D8D3C9] px-2 py-1.5 text-sm outline-none focus:border-[#006400]"
                 />
               </div>
-              <div>
-                <label className="block text-[10px] uppercase tracking-wide text-[#8C8579]">Lien (bouton)</label>
-                <input
-                  name="link_href"
-                  defaultValue={entry.link_href ?? ""}
-                  placeholder="/collections/..."
-                  className="mt-1 w-full rounded-md border border-[#D8D3C9] px-2 py-1.5 text-sm outline-none focus:border-[#006400]"
-                />
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <div>
+                  <label className="block text-[10px] uppercase tracking-wide text-[#8C8579]">Lien (bouton)</label>
+                  <input
+                    name="link_href"
+                    defaultValue={entry.link_href ?? ""}
+                    placeholder="/collections/..."
+                    className="mt-1 w-full rounded-md border border-[#D8D3C9] px-2 py-1.5 text-sm outline-none focus:border-[#006400]"
+                  />
+                </div>
+                <div>
+                  <label className="block text-[10px] uppercase tracking-wide text-[#8C8579]">
+                    Cadrage de l'image
+                  </label>
+                  <select
+                    name="image_position"
+                    defaultValue={entry.image_position ?? "center"}
+                    className="mt-1 w-full rounded-md border border-[#D8D3C9] bg-white px-2 py-1.5 text-sm outline-none focus:border-[#006400]"
+                  >
+                    <option value="top">Haut (visages en haut de la photo)</option>
+                    <option value="center">Centre (par défaut)</option>
+                    <option value="bottom">Bas</option>
+                  </select>
+                </div>
               </div>
               <div className="flex items-center justify-between pt-1">
                 <label className="flex items-center gap-2 text-sm">
@@ -141,6 +159,18 @@ export default async function SeasonalCollectionPage() {
             className="w-full rounded-md border border-[#D8D3C9] px-3 py-2 text-sm outline-none focus:border-[#006400]"
           />
           <ImageUrlUploader name="image_url" />
+          <div>
+            <label className="block text-[10px] uppercase tracking-wide text-[#8C8579]">Cadrage de l'image</label>
+            <select
+              name="image_position"
+              defaultValue="center"
+              className="mt-1 w-full rounded-md border border-[#D8D3C9] bg-white px-3 py-2 text-sm outline-none focus:border-[#006400]"
+            >
+              <option value="top">Haut (visages en haut de la photo)</option>
+              <option value="center">Centre (par défaut)</option>
+              <option value="bottom">Bas</option>
+            </select>
+          </div>
           <input
             name="link_href"
             placeholder="Lien bouton (ex: /collections/enfant)"
