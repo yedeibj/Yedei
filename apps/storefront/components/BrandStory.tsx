@@ -31,30 +31,14 @@ export default function BrandStory() {
             <span className="h-[3px] w-[7px] rounded-full bg-[#dc143c]" />
             <span className="h-[3px] w-[13px] rounded-full bg-[#00008b]" />
           </span>
-          <p className="mt-3 text-xs uppercase tracking-[0.25em] text-[#8C8579]">
-            Depuis le Bénin
-          </p>
-          <h2 className="mt-2 font-display text-3xl italic leading-tight text-[#181715] sm:text-4xl">
+          <h2 className="mt-4 font-display text-3xl italic leading-tight text-[#181715] sm:text-4xl">
             L'élégance pour toute la famille
           </h2>
           <p className="mt-4 max-w-md text-sm leading-relaxed text-[#8C8579] sm:text-base">
-            YEDEI est né d'une conviction simple : s'habiller élégamment ne devrait jamais
-            être compliqué, ni réservé à une seule tranche d'âge. De la première tenue de bébé
-            aux pièces intemporelles pour les parents, nous sélectionnons chaque article avec
-            la même exigence — de belles matières, des coupes soignées, et des prix qui
-            restent honnêtes.
-          </p>
-
-          <div className="mt-6 flex flex-wrap items-center gap-x-6 gap-y-2 text-xs text-[#181715] sm:text-sm">
-            <span><span className="font-medium text-[#006400]">4</span> collections</span>
-            <span className="text-[#D8D3C9]">·</span>
-            <span><span className="font-medium text-[#dc143c]">100%</span> paiement à la livraison</span>
-            <span className="text-[#D8D3C9]">·</span>
-            <span>Livraison au <span className="font-medium text-[#00008b]">Bénin</span> et environs</span>
-          </div>
-
-          <p className="mt-6 font-display text-sm italic text-[#8C8579]">
-            L'élégance, à chaque étape de la vie.
+            YEDEI habille les hommes, les femmes, les enfants et les bébés avec des pièces
+            pensées pour durer — des coupes soignées, des matières de qualité et une attention
+            portée à chaque détail. Que ce soit pour le quotidien ou les grandes occasions,
+            chaque génération de la famille trouve sa place chez YEDEI.
           </p>
         </div>
 
