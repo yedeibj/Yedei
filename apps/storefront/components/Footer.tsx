@@ -25,7 +25,7 @@ export default function Footer() {
     <footer className="bg-ink text-paper">
       <div className="mx-auto max-w-container px-6 py-16 md:px-10">
         <div className="mb-12 flex flex-col gap-6 border-b border-paper/15 pb-12 md:flex-row md:items-center md:justify-between">
-          <img src="/logo-white.png" alt="YEDEI" className="h-12 w-auto" />
+          <img src="/logo-white.png" alt="YEDEI" className="h-12 w-auto self-start" />
           <p className="max-w-sm text-sm text-paper/60">
             Vêtements pour hommes, femmes, enfants et bébés. Conçus avec soin,
             pensés pour durer.
