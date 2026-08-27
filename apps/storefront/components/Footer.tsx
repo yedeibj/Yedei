@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import FilYedei from "./FilYedei";
 import { categories } from "@/data/categories";
 
 const infoLinks = [
@@ -24,10 +23,7 @@ export default function Footer() {
     <footer className="bg-ink text-paper">
       <div className="mx-auto max-w-container px-6 py-16 md:px-10">
         <div className="mb-12 flex flex-col gap-6 border-b border-paper/15 pb-12 md:flex-row md:items-center md:justify-between">
-          <div>
-            <span className="font-display text-2xl">YEDEI</span>
-            <FilYedei className="mt-3" />
-          </div>
+          <img src="/logo-white.png" alt="YEDEI" className="h-12 w-auto" />
           <p className="max-w-sm text-sm text-paper/60">
             Vêtements pour hommes, femmes, enfants et bébés. Conçus avec soin,
             pensés pour durer.
@@ -90,7 +86,7 @@ export default function Footer() {
           <ul className="flex flex-wrap gap-x-6 gap-y-2 text-sm text-paper/70">
             {socialLinks.map((link) => (
               <li key={link.href}>
-                <a
+                
                   href={link.href}
                   target="_blank"
                   rel="noreferrer"
@@ -113,13 +109,13 @@ export default function Footer() {
             boutique d&apos;applications.
           </p>
           <div className="mt-5 flex flex-wrap gap-4">
-            <a
+            
               href="/app/yedei-android.apk"
               className="border border-paper/40 px-6 py-3 text-xs uppercase tracking-widest2 transition-colors hover:bg-paper hover:text-ink"
             >
               Télécharger sur Android
             </a>
-            <a
+            
               href="/installation-iphone"
               className="border border-paper/40 px-6 py-3 text-xs uppercase tracking-widest2 transition-colors hover:bg-paper hover:text-ink"
             >
