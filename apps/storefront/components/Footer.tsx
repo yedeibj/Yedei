@@ -86,7 +86,7 @@ export default function Footer() {
           <ul className="flex flex-wrap gap-x-6 gap-y-2 text-sm text-paper/70">
             {socialLinks.map((link) => (
               <li key={link.href}>
-                
+               <a 
                   href={link.href}
                   target="_blank"
                   rel="noreferrer"
