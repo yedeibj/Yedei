@@ -11,6 +11,7 @@ const fraunces = Fraunces({
   weight: ["400", "500", "600"],
   display: "swap",
 });
+
 const manrope = Manrope({
   subsets: ["latin"],
   variable: "--font-manrope",
@@ -24,6 +25,21 @@ export const metadata: Metadata = {
   title: "YEDEI — L'élégance pour toute la famille",
   description:
     "YEDEI habille hommes, femmes, enfants et bébés avec des collections élégantes pensées pour chaque génération.",
+  openGraph: {
+    title: "YEDEI — L'élégance pour toute la famille",
+    description:
+      "YEDEI habille hommes, femmes, enfants et bébés avec des collections élégantes pensées pour chaque génération.",
+    images: ["/og-image.png"],
+    type: "website",
+    locale: "fr_FR",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "YEDEI — L'élégance pour toute la famille",
+    description:
+      "YEDEI habille hommes, femmes, enfants et bébés avec des collections élégantes pensées pour chaque génération.",
+    images: ["/og-image.png"],
+  },
 };
 
 export default function RootLayout({
