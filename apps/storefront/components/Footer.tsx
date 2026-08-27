@@ -16,6 +16,8 @@ const socialLinks = [
   { label: "TikTok", href: "https://tiktok.com" },
 ];
 
+const appLinkClass = "border border-paper/40 px-6 py-3 text-xs uppercase tracking-widest2 transition-colors hover:bg-paper hover:text-ink";
+
 export default function Footer() {
   const [openSlug, setOpenSlug] = useState<string | null>(null);
 
@@ -106,18 +108,8 @@ export default function Footer() {
             boutique d&apos;applications.
           </p>
           <div className="mt-5 flex flex-wrap gap-4">
-            
-              href="/app/yedei-android.apk"
-              className="border border-paper/40 px-6 py-3 text-xs uppercase tracking-widest2 transition-colors hover:bg-paper hover:text-ink"
-            >
-              Télécharger sur Android
-            </a>
-            
-              href="/installation-iphone"
-              className="border border-paper/40 px-6 py-3 text-xs uppercase tracking-widest2 transition-colors hover:bg-paper hover:text-ink"
-            >
-              Télécharger sur iPhone
-            </a>
+            <a href="/app/yedei-android.apk" className={appLinkClass}>Télécharger sur Android</a>
+            <a href="/installation-iphone" className={appLinkClass}>Télécharger sur iPhone</a>
           </div>
         </div>
 
