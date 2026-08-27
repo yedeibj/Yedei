@@ -2,7 +2,6 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import FilYedei from "./FilYedei";
 import CartIndicator from "./CartIndicator";
 import { categories } from "@/data/categories";
 
@@ -15,11 +14,8 @@ export default function Header() {
     <header className="sticky top-0 z-50 border-b border-stone-light/60 bg-paper/90 backdrop-blur">
       <div className="mx-auto flex max-w-container items-center justify-between px-6 py-4 md:px-10">
         {/* Logo */}
-        <Link href="/" className="flex flex-col items-start gap-1.5">
-          <span className="font-display text-2xl tracking-wide text-ink">
-            YEDEI
-          </span>
-          <FilYedei />
+        <Link href="/">
+          <img src="/logo.png" alt="YEDEI" className="h-12 w-auto sm:h-14" />
         </Link>
 
         {/* Desktop nav */}
