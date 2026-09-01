@@ -1,6 +1,8 @@
 import { createClient as createServerSupabaseClient } from "@yedei/database/server";
+import { revalidatePath } from "next/cache";
 import AdminShell from "@/components/AdminShell";
 import OrderStatusForm from "@/components/OrderStatusForm";
+import ConfirmSubmitButton from "@/components/ConfirmSubmitButton";
 
 const STATUS_LABELS: Record<string, string> = {
   en_attente: "En attente",
@@ -18,6 +20,15 @@ const STATUS_COLORS: Record<string, string> = {
   annulee: "bg-[#FDECEF] text-[#DC143C]",
 };
 
+async function deleteOrder(formData: FormData) {
+  "use server";
+  const supabase = await createServerSupabaseClient();
+  const id = String(formData.get("id"));
+  if (!id) return;
+  await supabase.from("orders").delete().eq("id", id);
+  revalidatePath("/commandes");
+}
+
 export default async function OrdersPage({
   searchParams,
 }: {
@@ -29,25 +40,24 @@ export default async function OrdersPage({
   let query = supabase
     .from("orders")
     .select(
-      "id, customer_name, phone, email, address, city, notes, total, status, payment_status, created_at, order_items(product_name, variant_size, variant_label, unit_price, quantity)"
+      "id, customer_name, phone, email, address, city, notes, subtotal, delivery_fee, total, status, payment_status, payment_method, created_at, order_items(product_name, variant_size, variant_label, unit_price, quantity)"
     )
     .order("created_at", { ascending: false });
 
   if (filtre && filtre !== "toutes") query = query.eq("status", filtre);
 
   const { data: orders } = await query;
-
   const statusEntries = Object.entries(STATUS_LABELS);
 
   return (
     <AdminShell>
       <h1 className="font-display text-2xl italic text-[#181715]">Commandes</h1>
       <p className="mt-1 text-sm text-[#8C8579]">
-        Paiement à la livraison pour l'instant. Marque "Payé" une fois la livraison encaissée.
+        Paiement à la livraison ou en ligne via FedaPay. Marque "Payé" une fois la livraison encaissée.
       </p>
 
       <div className="mt-6 flex flex-wrap gap-2 text-xs uppercase tracking-wide">
-        <a
+        
           href="/commandes"
           className={
             !filtre || filtre === "toutes"
@@ -90,6 +100,9 @@ export default async function OrdersPage({
                 <p className="text-xs text-[#8C8579]">
                   {order.address}{order.city ? ", " + order.city : ""}
                 </p>
+                <p className="text-xs text-[#8C8579]">
+                  Paiement : {order.payment_method === "fedapay" ? "En ligne (FedaPay)" : "À la livraison"}
+                </p>
                 {order.notes && (
                   <p className="mt-1 text-xs italic text-[#8C8579]">{order.notes}</p>
                 )}
@@ -115,14 +128,29 @@ export default async function OrdersPage({
                   <span>{(item.unit_price * item.quantity).toLocaleString("fr-FR")} FCFA</span>
                 </div>
               ))}
+              <div className="flex items-center justify-between pt-1 text-xs text-[#8C8579]">
+                <span>Sous-total</span>
+                <span>{Number(order.subtotal).toLocaleString("fr-FR")} FCFA</span>
+              </div>
+              <div className="flex items-center justify-between text-xs text-[#8C8579]">
+                <span>Livraison</span>
+                <span>{Number(order.delivery_fee ?? 0).toLocaleString("fr-FR")} FCFA</span>
+              </div>
               <div className="flex items-center justify-between border-t border-[#F0EDE5] pt-2 text-sm font-medium text-[#181715]">
                 <span>Total</span>
                 <span>{Number(order.total).toLocaleString("fr-FR")} FCFA</span>
               </div>
             </div>
 
-            <div className="mt-3 border-t border-[#F0EDE5] pt-3">
+            <div className="mt-3 flex flex-wrap items-center justify-between gap-3 border-t border-[#F0EDE5] pt-3">
               <OrderStatusForm orderId={order.id} status={order.status} paymentStatus={order.payment_status} />
+              <ConfirmSubmitButton
+                action={deleteOrder}
+                hiddenFields={{ id: order.id }}
+                confirmMessage={`Supprimer définitivement la commande de ${order.customer_name} ?`}
+                label="Supprimer"
+                className="text-xs text-[#DC143C] hover:underline"
+              />
             </div>
           </div>
         ))}
