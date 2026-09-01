@@ -13,6 +13,7 @@ const links = [
   { label: "Textes accueil", href: "/textes-accueil" },
   { href: "/promo", label: "Barre promotionnelle" },
   { label: "Commandes", href: "/commandes" },
+  { label: "Réglages", href: "/reglages" },
   { href: "/avis", label: "Avis clients" },
 ];
 
