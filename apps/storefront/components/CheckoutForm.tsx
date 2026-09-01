@@ -214,3 +214,70 @@ export default function CheckoutForm({ deliveryFee }: { deliveryFee: number }) {
                   Payer en ligne maintenant (carte bancaire, Mobile Money)
                 </label>
                 <label className="flex items-center gap-3 rounded-md border border-[#D8D3C9] px-3 py-3 text-sm has-[:checked]:border-[#006400] has-[:checked]:bg-[#E8F5E9]">
+                  <input
+                    type="radio"
+                    name="paymentMethod"
+                    checked={paymentMethod === "livraison"}
+                    onChange={() => setPaymentMethod("livraison")}
+                  />
+                  Paiement à la livraison
+                </label>
+              </div>
+            </div>
+
+            {error && <p className="text-sm text-[#DC143C]">{error}</p>}
+
+            <button
+              type="submit"
+              disabled={isSubmitting}
+              className="w-full rounded-md bg-[#006400] py-3 text-sm font-medium uppercase tracking-wide text-white transition-opacity hover:opacity-90 disabled:opacity-50"
+            >
+              {isSubmitting
+                ? "Traitement en cours..."
+                : paymentMethod === "fedapay"
+                ? "Continuer vers le paiement"
+                : "Confirmer la commande"}
+            </button>
+          </form>
+        </div>
+
+        <div>
+          <h2 className="font-display text-xl italic text-[#181715]">Récapitulatif</h2>
+          <div className="mt-4 space-y-3">
+            {items.map((item) => (
+              <div key={item.productId + item.variantId} className="flex items-center gap-3 border-b border-[#F0EDE5] pb-3">
+                <div className="h-16 w-16 overflow-hidden rounded-md bg-white">
+                  {item.imageUrl && (
+                    <img src={item.imageUrl} alt="" className="h-full w-full object-contain" />
+                  )}
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm text-[#181715]">{item.name}</p>
+                  <p className="text-xs text-[#8C8579]">
+                    Taille : {item.size} {item.variantLabel && `— ${item.variantLabel}`} · Qté {item.quantity}
+                  </p>
+                </div>
+                <p className="text-sm text-[#181715]">{formatFcfa(item.price * item.quantity)}</p>
+              </div>
+            ))}
+          </div>
+          <div className="mt-4 space-y-1 border-t border-[#D8D3C9] pt-4">
+            <div className="flex items-center justify-between text-sm text-[#8C8579]">
+              <span>Sous-total</span>
+              <span>{formatFcfa(totalPrice)}</span>
+            </div>
+            <div className="flex items-center justify-between text-sm text-[#8C8579]">
+              <span>Livraison</span>
+              <span>{formatFcfa(deliveryFee)}</span>
+            </div>
+            <div className="flex items-center justify-between pt-2 text-lg text-[#181715]">
+              <span className="font-medium">Total</span>
+              <span>{formatFcfa(total)}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <Footer />
+    </main>
+  );
+}
