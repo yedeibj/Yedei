@@ -1,6 +1,7 @@
 "use server";
 
 import { createClient as createServerSupabaseClient } from "@yedei/database/server";
+import { createServiceClient } from "@yedei/database/service";
 import { headers } from "next/headers";
 
 type OrderItemInput = {
@@ -43,30 +44,28 @@ export async function createOrder(input: {
 
   const supabase = await createServerSupabaseClient();
   const subtotal = input.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const orderId = crypto.randomUUID();
 
-  const { data: order, error: orderError } = await supabase
-    .from("orders")
-    .insert({
-      customer_name: input.customerName.trim(),
-      phone: input.phone.trim(),
-      email: input.email?.trim() || null,
-      address: input.address.trim(),
-      city: input.city?.trim() || null,
-      notes: input.notes?.trim() || null,
-      subtotal,
-      total: subtotal,
-      payment_method: input.paymentMethod,
-    })
-    .select("id")
-    .single();
+  const { error: orderError } = await supabase.from("orders").insert({
+    id: orderId,
+    customer_name: input.customerName.trim(),
+    phone: input.phone.trim(),
+    email: input.email?.trim() || null,
+    address: input.address.trim(),
+    city: input.city?.trim() || null,
+    notes: input.notes?.trim() || null,
+    subtotal,
+    total: subtotal,
+    payment_method: input.paymentMethod,
+  });
 
-  if (orderError || !order) {
+  if (orderError) {
     return { error: "Erreur lors de la création de la commande. Réessaie dans un instant." };
   }
 
   const { error: itemsError } = await supabase.from("order_items").insert(
     input.items.map((item) => ({
-      order_id: order.id,
+      order_id: orderId,
       product_id: item.productId,
       product_name: item.name,
       variant_size: item.size,
@@ -82,7 +81,7 @@ export async function createOrder(input: {
   }
 
   if (input.paymentMethod === "livraison") {
-    return { orderId: order.id as string };
+    return { orderId };
   }
 
   // --- Paiement en ligne via FedaPay ---
@@ -90,7 +89,7 @@ export async function createOrder(input: {
     const headersList = await headers();
     const host = headersList.get("host");
     const protocol = host?.includes("localhost") ? "http" : "https";
-    const callbackUrl = `${protocol}://${host}/commande/retour?order=${order.id}`;
+    const callbackUrl = `${protocol}://${host}/commande/retour?order=${orderId}`;
     const { firstname, lastname } = splitName(input.customerName);
 
     const createRes = await fetch(`${FEDAPAY_BASE_URL}/v1/transactions`, {
@@ -100,7 +99,7 @@ export async function createOrder(input: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        description: `Commande YEDEI #${order.id.slice(0, 8).toUpperCase()}`,
+        description: `Commande YEDEI #${orderId.slice(0, 8).toUpperCase()}`,
         amount: Math.round(subtotal),
         currency: { iso: "XOF" },
         callback_url: callbackUrl,
@@ -135,12 +134,12 @@ export async function createOrder(input: {
       return { error: "Impossible de générer le lien de paiement. Réessaie ou choisis le paiement à la livraison." };
     }
 
-    await supabase
-      .from("orders")
-      .update({ fedapay_transaction_id: String(transactionId) })
-      .eq("id", order.id);
+    // Le client public n'a pas le droit de modifier une commande (RLS) —
+    // on utilise donc le client à privilèges élevés pour cette seule écriture.
+    const serviceClient = createServiceClient();
+    await serviceClient.from("orders").update({ fedapay_transaction_id: String(transactionId) }).eq("id", orderId);
 
-    return { orderId: order.id as string, paymentUrl: paymentUrl as string };
+    return { orderId, paymentUrl: paymentUrl as string };
   } catch {
     return { error: "Erreur de connexion au service de paiement. Réessaie ou choisis le paiement à la livraison." };
   }
