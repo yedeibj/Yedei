@@ -60,6 +60,7 @@ export async function createOrder(input: {
   });
 
   if (orderError) {
+    console.error("Supabase order insert failed:", orderError);
     return { error: "Erreur lors de la création de la commande. Réessaie dans un instant." };
   }
 
@@ -77,6 +78,7 @@ export async function createOrder(input: {
   );
 
   if (itemsError) {
+    console.error("Supabase order_items insert failed:", itemsError);
     return { error: "Erreur lors de l'enregistrement des articles de la commande." };
   }
 
@@ -91,6 +93,11 @@ export async function createOrder(input: {
     const protocol = host?.includes("localhost") ? "http" : "https";
     const callbackUrl = `${protocol}://${host}/commande/retour?order=${orderId}`;
     const { firstname, lastname } = splitName(input.customerName);
+
+    if (!process.env.FEDAPAY_SECRET_KEY) {
+      console.error("FEDAPAY_SECRET_KEY est absente des variables d'environnement au runtime.");
+      return { error: "Impossible d'initier le paiement en ligne. Réessaie ou choisis le paiement à la livraison." };
+    }
 
     const createRes = await fetch(`${FEDAPAY_BASE_URL}/v1/transactions`, {
       method: "POST",
@@ -113,10 +120,22 @@ export async function createOrder(input: {
     });
 
     const createData = await createRes.json();
+
+    if (!createRes.ok) {
+      console.error(
+        "FedaPay create transaction failed:",
+        createRes.status,
+        FEDAPAY_ENV,
+        JSON.stringify(createData)
+      );
+      return { error: "Impossible d'initier le paiement en ligne. Réessaie ou choisis le paiement à la livraison." };
+    }
+
     const transaction = createData["v1/transaction"] ?? createData.transaction ?? createData;
     const transactionId = transaction?.id;
 
     if (!transactionId) {
+      console.error("FedaPay response missing transaction id:", JSON.stringify(createData));
       return { error: "Impossible d'initier le paiement en ligne. Réessaie ou choisis le paiement à la livraison." };
     }
 
@@ -127,20 +146,36 @@ export async function createOrder(input: {
         "Content-Type": "application/json",
       },
     });
+
     const tokenData = await tokenRes.json();
+
+    if (!tokenRes.ok) {
+      console.error("FedaPay token generation failed:", tokenRes.status, JSON.stringify(tokenData));
+      return { error: "Impossible de générer le lien de paiement. Réessaie ou choisis le paiement à la livraison." };
+    }
+
     const paymentUrl = tokenData?.url;
 
     if (!paymentUrl) {
+      console.error("FedaPay token response missing url:", JSON.stringify(tokenData));
       return { error: "Impossible de générer le lien de paiement. Réessaie ou choisis le paiement à la livraison." };
     }
 
     // Le client public n'a pas le droit de modifier une commande (RLS) —
     // on utilise donc le client à privilèges élevés pour cette seule écriture.
     const serviceClient = createServiceClient();
-    await serviceClient.from("orders").update({ fedapay_transaction_id: String(transactionId) }).eq("id", orderId);
+    const { error: updateError } = await serviceClient
+      .from("orders")
+      .update({ fedapay_transaction_id: String(transactionId) })
+      .eq("id", orderId);
+
+    if (updateError) {
+      console.error("Supabase order update (fedapay_transaction_id) failed:", updateError);
+    }
 
     return { orderId, paymentUrl: paymentUrl as string };
-  } catch {
+  } catch (err) {
+    console.error("Erreur inattendue lors de l'appel FedaPay:", err);
     return { error: "Erreur de connexion au service de paiement. Réessaie ou choisis le paiement à la livraison." };
   }
 }
