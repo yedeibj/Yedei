@@ -1,271 +1,163 @@
-"use client";
+import { createClient as createServerSupabaseClient } from "@yedei/database/server";
+import { revalidatePath } from "next/cache";
+import AdminShell from "@/components/AdminShell";
+import OrderStatusForm from "@/components/OrderStatusForm";
+import ConfirmSubmitButton from "@/components/ConfirmSubmitButton";
 
-import { useState } from "react";
-import Link from "next/link";
-import { useCart } from "@/lib/cart-context";
-import { createOrder } from "./actions";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
+const STATUS_LABELS: Record<string, string> = {
+  en_attente: "En attente",
+  confirmee: "Confirmée",
+  expediee: "Expédiée",
+  livree: "Livrée",
+  annulee: "Annulée",
+};
 
-function formatFcfa(value: number) {
-  return value.toLocaleString("fr-FR") + " FCFA";
+const STATUS_COLORS: Record<string, string> = {
+  en_attente: "bg-[#EEF3FF] text-[#00008B]",
+  confirmee: "bg-[#E8F5E9] text-[#006400]",
+  expediee: "bg-[#EEF3FF] text-[#00008B]",
+  livree: "bg-[#E8F5E9] text-[#006400]",
+  annulee: "bg-[#FDECEF] text-[#DC143C]",
+};
+
+async function deleteOrder(formData: FormData) {
+  "use server";
+  const supabase = await createServerSupabaseClient();
+  const id = String(formData.get("id"));
+  if (!id) return;
+  await supabase.from("orders").delete().eq("id", id);
+  revalidatePath("/commandes");
 }
 
-export default function CheckoutPage() {
-  const { items, totalPrice, clearCart } = useCart();
+export default async function OrdersPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ filtre?: string }>;
+}) {
+  const { filtre } = await searchParams;
+  const supabase = await createServerSupabaseClient();
 
-  const [customerName, setCustomerName] = useState("");
-  const [phone, setPhone] = useState("");
-  const [email, setEmail] = useState("");
-  const [address, setAddress] = useState("");
-  const [city, setCity] = useState("");
-  const [notes, setNotes] = useState("");
-  const [paymentMethod, setPaymentMethod] = useState<"livraison" | "fedapay">("livraison");
-  const [error, setError] = useState<string | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [confirmedOrderId, setConfirmedOrderId] = useState<string | null>(null);
+  let query = supabase
+    .from("orders")
+    .select(
+      "id, customer_name, phone, email, address, city, notes, subtotal, delivery_fee, total, status, payment_status, payment_method, created_at, order_items(product_name, variant_size, variant_label, unit_price, quantity)"
+    )
+    .order("created_at", { ascending: false });
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setError(null);
-    setIsSubmitting(true);
+  if (filtre && filtre !== "toutes") query = query.eq("status", filtre);
 
-    const result = await createOrder({
-      customerName,
-      phone,
-      email,
-      address,
-      city,
-      notes,
-      paymentMethod,
-      items: items.map((item) => ({
-        productId: item.productId,
-        name: item.name,
-        size: item.size,
-        variantLabel: item.variantLabel,
-        price: item.price,
-        quantity: item.quantity,
-        imageUrl: item.imageUrl,
-      })),
-    });
-
-    if (result.error) {
-      setIsSubmitting(false);
-      setError(result.error);
-      return;
-    }
-
-    clearCart();
-
-    if (result.paymentUrl) {
-      window.location.href = result.paymentUrl;
-      return;
-    }
-
-    setIsSubmitting(false);
-    setConfirmedOrderId(result.orderId ?? null);
-  }
-
-  if (confirmedOrderId) {
-    const reference = confirmedOrderId.slice(0, 8).toUpperCase();
-    return (
-      <main>
-        <Header />
-        <div className="mx-auto max-w-lg px-6 py-20 text-center sm:px-12">
-          <span className="flex justify-center gap-[3px]" aria-hidden="true">
-            <span className="h-[3px] w-[10px] rounded-full bg-[#006400]" />
-            <span className="h-[3px] w-[7px] rounded-full bg-[#dc143c]" />
-            <span className="h-[3px] w-[13px] rounded-full bg-[#00008b]" />
-          </span>
-          <h1 className="mt-4 font-display text-3xl italic text-[#181715]">
-            Merci pour ta commande !
-          </h1>
-          <p className="mt-3 text-sm text-[#8C8579]">
-            Référence de commande : <span className="text-[#181715]">#{reference}</span>
-          </p>
-          <p className="mt-4 text-sm leading-relaxed text-[#8C8579]">
-            Nous allons te contacter très vite au numéro fourni pour confirmer la livraison.
-            Paiement à la livraison.
-          </p>
-          <Link
-            href="/"
-            className="mt-8 inline-block rounded-md bg-[#006400] px-6 py-3 text-sm uppercase tracking-wide text-white hover:opacity-90"
-          >
-            Retour à l'accueil
-          </Link>
-        </div>
-        <Footer />
-      </main>
-    );
-  }
-
-  if (items.length === 0) {
-    return (
-      <main>
-        <Header />
-        <div className="px-6 py-16 text-center sm:px-12">
-          <p className="text-sm text-[#8C8579]">Ton panier est vide.</p>
-          <Link href="/" className="mt-3 inline-block text-sm text-[#006400] underline">
-            Continuer mes achats
-          </Link>
-        </div>
-        <Footer />
-      </main>
-    );
-  }
+  const { data: orders } = await query;
+  const statusEntries = Object.entries(STATUS_LABELS);
 
   return (
-    <main>
-      <Header />
-      <div className="grid grid-cols-1 gap-10 px-6 py-10 sm:px-12 lg:grid-cols-2">
-        <div>
-          <h1 className="font-display text-2xl italic text-[#181715]">Finaliser la commande</h1>
+    <AdminShell>
+      <h1 className="font-display text-2xl italic text-[#181715]">Commandes</h1>
+      <p className="mt-1 text-sm text-[#8C8579]">
+        Paiement à la livraison ou en ligne via FedaPay. Marque "Payé" une fois la livraison encaissée.
+      </p>
 
-          <form onSubmit={handleSubmit} className="mt-6 space-y-4">
-            <div>
-              <label className="block text-xs uppercase tracking-wide text-[#181715]">
-                Nom complet
-              </label>
-              <input
-                required
-                value={customerName}
-                onChange={(e) => setCustomerName(e.target.value)}
-                className="mt-1 w-full rounded-md border border-[#D8D3C9] px-3 py-2 text-sm outline-none focus:border-[#006400]"
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="block text-xs uppercase tracking-wide text-[#181715]">
-                  Téléphone
-                </label>
-                <input
-                  required
-                  type="tel"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  className="mt-1 w-full rounded-md border border-[#D8D3C9] px-3 py-2 text-sm outline-none focus:border-[#006400]"
-                />
-              </div>
-              <div>
-                <label className="block text-xs uppercase tracking-wide text-[#181715]">
-                  Email (optionnel)
-                </label>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="mt-1 w-full rounded-md border border-[#D8D3C9] px-3 py-2 text-sm outline-none focus:border-[#006400]"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-xs uppercase tracking-wide text-[#181715]">
-                Adresse de livraison
-              </label>
-              <input
-                required
-                value={address}
-                onChange={(e) => setAddress(e.target.value)}
-                placeholder="Quartier, rue, repère..."
-                className="mt-1 w-full rounded-md border border-[#D8D3C9] px-3 py-2 text-sm outline-none focus:border-[#006400]"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs uppercase tracking-wide text-[#181715]">
-                Ville
-              </label>
-              <input
-                value={city}
-                onChange={(e) => setCity(e.target.value)}
-                className="mt-1 w-full rounded-md border border-[#D8D3C9] px-3 py-2 text-sm outline-none focus:border-[#006400]"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs uppercase tracking-wide text-[#181715]">
-                Note (optionnel)
-              </label>
-              <textarea
-                rows={2}
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                placeholder="Instructions de livraison, préférence horaire..."
-                className="mt-1 w-full rounded-md border border-[#D8D3C9] px-3 py-2 text-sm outline-none focus:border-[#006400]"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs uppercase tracking-wide text-[#181715]">
-                Mode de paiement
-              </label>
-              <div className="mt-2 space-y-2">
-                <label className="flex items-center gap-3 rounded-md border border-[#D8D3C9] px-3 py-3 text-sm has-[:checked]:border-[#006400] has-[:checked]:bg-[#E8F5E9]">
-                  <input
-                    type="radio"
-                    name="paymentMethod"
-                    checked={paymentMethod === "livraison"}
-                    onChange={() => setPaymentMethod("livraison")}
-                  />
-                  Paiement à la livraison
-                </label>
-                <label className="flex items-center gap-3 rounded-md border border-[#D8D3C9] px-3 py-3 text-sm has-[:checked]:border-[#006400] has-[:checked]:bg-[#E8F5E9]">
-                  <input
-                    type="radio"
-                    name="paymentMethod"
-                    checked={paymentMethod === "fedapay"}
-                    onChange={() => setPaymentMethod("fedapay")}
-                  />
-                  Payer en ligne maintenant (carte bancaire, Mobile Money)
-                </label>
-              </div>
-            </div>
-
-            {error && <p className="text-sm text-[#DC143C]">{error}</p>}
-
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="w-full rounded-md bg-[#006400] py-3 text-sm font-medium uppercase tracking-wide text-white transition-opacity hover:opacity-90 disabled:opacity-50"
-            >
-              {isSubmitting
-                ? "Traitement en cours..."
-                : paymentMethod === "fedapay"
-                ? "Continuer vers le paiement"
-                : "Confirmer la commande"}
-            </button>
-          </form>
-        </div>
-
-        <div>
-          <h2 className="font-display text-xl italic text-[#181715]">Récapitulatif</h2>
-          <div className="mt-4 space-y-3">
-            {items.map((item) => (
-              <div key={item.productId + item.variantId} className="flex items-center gap-3 border-b border-[#F0EDE5] pb-3">
-                <div className="h-16 w-16 overflow-hidden rounded-md bg-white">
-                  {item.imageUrl && (
-                    <img src={item.imageUrl} alt="" className="h-full w-full object-contain" />
-                  )}
-                </div>
-                <div className="flex-1">
-                  <p className="text-sm text-[#181715]">{item.name}</p>
-                  <p className="text-xs text-[#8C8579]">
-                    Taille : {item.size} {item.variantLabel && `— ${item.variantLabel}`} · Qté {item.quantity}
-                  </p>
-                </div>
-                <p className="text-sm text-[#181715]">{formatFcfa(item.price * item.quantity)}</p>
-              </div>
-            ))}
-          </div>
-          <div className="mt-4 flex items-center justify-between border-t border-[#D8D3C9] pt-4">
-            <p className="text-sm font-medium text-[#181715]">Total</p>
-            <p className="text-lg text-[#181715]">{formatFcfa(totalPrice)}</p>
-          </div>
-        </div>
+      <div className="mt-6 flex flex-wrap gap-2 text-xs uppercase tracking-wide">
+        
+          href="/commandes"
+          className={
+            !filtre || filtre === "toutes"
+              ? "rounded-full bg-[#181715] px-3 py-1.5 text-white"
+              : "rounded-full border border-[#D8D3C9] px-3 py-1.5 text-[#181715]"
+          }
+        >
+          Toutes
+        </a>
+        {statusEntries.map((entry) => {
+          const value = entry[0];
+          const label = entry[1];
+          const isActive = filtre === value;
+          const linkHref = "/commandes?filtre=" + value;
+          const linkClass = isActive
+            ? "rounded-full bg-[#181715] px-3 py-1.5 text-white"
+            : "rounded-full border border-[#D8D3C9] px-3 py-1.5 text-[#181715]";
+          return (
+            <a key={value} href={linkHref} className={linkClass}>
+              {label}
+            </a>
+          );
+        })}
       </div>
-      <Footer />
-    </main>
+
+      <div className="mt-6 space-y-4">
+        {(orders ?? []).map((order: any) => (
+          <div key={order.id} className="rounded-md border border-[#D8D3C9] p-4">
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <p className="text-sm font-medium text-[#181715]">
+                  {order.customer_name}{" "}
+                  <span className="text-xs font-normal text-[#8C8579]">
+                    #{order.id.slice(0, 8).toUpperCase()}
+                  </span>
+                </p>
+                <p className="text-xs text-[#8C8579]">
+                  {order.phone}{order.email ? " · " + order.email : ""}
+                </p>
+                <p className="text-xs text-[#8C8579]">
+                  {order.address}{order.city ? ", " + order.city : ""}
+                </p>
+                <p className="text-xs text-[#8C8579]">
+                  Paiement : {order.payment_method === "fedapay" ? "En ligne (FedaPay)" : "À la livraison"}
+                </p>
+                {order.notes && (
+                  <p className="mt-1 text-xs italic text-[#8C8579]">{order.notes}</p>
+                )}
+              </div>
+              <div className="flex flex-col items-end gap-1">
+                <span className={"rounded-full px-2 py-1 text-[10px] uppercase tracking-wide " + (STATUS_COLORS[order.status] ?? "")}>
+                  {STATUS_LABELS[order.status] ?? order.status}
+                </span>
+                <span className={"rounded-full px-2 py-1 text-[10px] uppercase tracking-wide " + (order.payment_status === "paye" ? "bg-[#E8F5E9] text-[#006400]" : "bg-[#FDECEF] text-[#DC143C]")}>
+                  {order.payment_status === "paye" ? "Payé" : "Non payé"}
+                </span>
+              </div>
+            </div>
+
+            <div className="mt-3 space-y-1 border-t border-[#F0EDE5] pt-3">
+              {(order.order_items ?? []).map((item: any, i: number) => (
+                <div key={i} className="flex items-center justify-between text-xs text-[#181715]">
+                  <span>
+                    {item.product_name}
+                    {item.variant_size ? " — " + item.variant_size : ""}
+                    {item.variant_label ? " (" + item.variant_label + ")" : ""} × {item.quantity}
+                  </span>
+                  <span>{(item.unit_price * item.quantity).toLocaleString("fr-FR")} FCFA</span>
+                </div>
+              ))}
+              <div className="flex items-center justify-between pt-1 text-xs text-[#8C8579]">
+                <span>Sous-total</span>
+                <span>{Number(order.subtotal).toLocaleString("fr-FR")} FCFA</span>
+              </div>
+              <div className="flex items-center justify-between text-xs text-[#8C8579]">
+                <span>Livraison</span>
+                <span>{Number(order.delivery_fee ?? 0).toLocaleString("fr-FR")} FCFA</span>
+              </div>
+              <div className="flex items-center justify-between border-t border-[#F0EDE5] pt-2 text-sm font-medium text-[#181715]">
+                <span>Total</span>
+                <span>{Number(order.total).toLocaleString("fr-FR")} FCFA</span>
+              </div>
+            </div>
+
+            <div className="mt-3 flex flex-wrap items-center justify-between gap-3 border-t border-[#F0EDE5] pt-3">
+              <OrderStatusForm orderId={order.id} status={order.status} paymentStatus={order.payment_status} />
+              <ConfirmSubmitButton
+                action={deleteOrder}
+                hiddenFields={{ id: order.id }}
+                confirmMessage={`Supprimer définitivement la commande de ${order.customer_name} ?`}
+                label="Supprimer"
+                className="text-xs text-[#DC143C] hover:underline"
+              />
+            </div>
+          </div>
+        ))}
+        {(!orders || orders.length === 0) && (
+          <p className="text-sm text-[#8C8579]">Aucune commande pour le moment.</p>
+        )}
+      </div>
+    </AdminShell>
   );
 }
