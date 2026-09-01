@@ -26,13 +26,12 @@ export default function AddToCartPanel({
   imageUrl?: string;
   variants: Variant[];
 }) {
-  const { addItem } = useCart();
+  const { addItem, openCart } = useCart();
   const [selectedVariantId, setSelectedVariantId] = useState<string | null>(
     variants.length === 0 ? "unique" : null
   );
   const [quantity, setQuantity] = useState(1);
   const [error, setError] = useState<string | null>(null);
-  const [justAdded, setJustAdded] = useState(false);
 
   function effectivePrice(variant: Variant) {
     return variant.price ?? basePrice;
@@ -70,8 +69,7 @@ export default function AddToCartPanel({
       imageUrl,
     });
 
-    setJustAdded(true);
-    setTimeout(() => setJustAdded(false), 2500);
+    openCart();
   }
 
   return (
@@ -164,7 +162,7 @@ export default function AddToCartPanel({
         onClick={handleAddToCart}
         className="mt-6 w-full rounded-md bg-[#006400] py-3 text-sm font-medium uppercase tracking-wide text-white transition-opacity hover:opacity-90 sm:w-auto sm:px-10"
       >
-        {justAdded ? "Ajoute ✓" : "Ajouter au panier"}
+        Ajouter au panier
       </button>
     </div>
   );
