@@ -20,6 +20,7 @@ export default function CheckoutPage() {
   const [address, setAddress] = useState("");
   const [city, setCity] = useState("");
   const [notes, setNotes] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState<"livraison" | "fedapay">("livraison");
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [confirmedOrderId, setConfirmedOrderId] = useState<string | null>(null);
@@ -36,6 +37,7 @@ export default function CheckoutPage() {
       address,
       city,
       notes,
+      paymentMethod,
       items: items.map((item) => ({
         productId: item.productId,
         name: item.name,
@@ -47,15 +49,21 @@ export default function CheckoutPage() {
       })),
     });
 
-    setIsSubmitting(false);
-
     if (result.error) {
+      setIsSubmitting(false);
       setError(result.error);
       return;
     }
 
-    setConfirmedOrderId(result.orderId ?? null);
     clearCart();
+
+    if (result.paymentUrl) {
+      window.location.href = result.paymentUrl;
+      return;
+    }
+
+    setIsSubmitting(false);
+    setConfirmedOrderId(result.orderId ?? null);
   }
 
   if (confirmedOrderId) {
@@ -189,9 +197,30 @@ export default function CheckoutPage() {
               />
             </div>
 
-            <div className="rounded-md border border-[#D8D3C9] bg-[#F6F3EC] px-3 py-3 text-xs text-[#8C8579]">
-              <span className="font-medium text-[#181715]">Mode de paiement : </span>
-              Paiement à la livraison. D'autres moyens de paiement arrivent bientôt.
+            <div>
+              <label className="block text-xs uppercase tracking-wide text-[#181715]">
+                Mode de paiement
+              </label>
+              <div className="mt-2 space-y-2">
+                <label className="flex items-center gap-3 rounded-md border border-[#D8D3C9] px-3 py-3 text-sm has-[:checked]:border-[#006400] has-[:checked]:bg-[#E8F5E9]">
+                  <input
+                    type="radio"
+                    name="paymentMethod"
+                    checked={paymentMethod === "livraison"}
+                    onChange={() => setPaymentMethod("livraison")}
+                  />
+                  Paiement à la livraison
+                </label>
+                <label className="flex items-center gap-3 rounded-md border border-[#D8D3C9] px-3 py-3 text-sm has-[:checked]:border-[#006400] has-[:checked]:bg-[#E8F5E9]">
+                  <input
+                    type="radio"
+                    name="paymentMethod"
+                    checked={paymentMethod === "fedapay"}
+                    onChange={() => setPaymentMethod("fedapay")}
+                  />
+                  Payer en ligne maintenant (carte bancaire, Mobile Money)
+                </label>
+              </div>
             </div>
 
             {error && <p className="text-sm text-[#DC143C]">{error}</p>}
@@ -201,7 +230,11 @@ export default function CheckoutPage() {
               disabled={isSubmitting}
               className="w-full rounded-md bg-[#006400] py-3 text-sm font-medium uppercase tracking-wide text-white transition-opacity hover:opacity-90 disabled:opacity-50"
             >
-              {isSubmitting ? "Envoi en cours..." : "Confirmer la commande"}
+              {isSubmitting
+                ? "Traitement en cours..."
+                : paymentMethod === "fedapay"
+                ? "Continuer vers le paiement"
+                : "Confirmer la commande"}
             </button>
           </form>
         </div>
