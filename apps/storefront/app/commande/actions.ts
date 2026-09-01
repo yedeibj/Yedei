@@ -33,6 +33,7 @@ export async function createOrder(input: {
   city?: string;
   notes?: string;
   paymentMethod: "livraison" | "fedapay";
+  deliveryFee: number;
   items: OrderItemInput[];
 }) {
   if (!input.items || input.items.length === 0) {
@@ -44,6 +45,8 @@ export async function createOrder(input: {
 
   const supabase = await createServerSupabaseClient();
   const subtotal = input.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const deliveryFee = Number(input.deliveryFee) || 0;
+  const total = subtotal + deliveryFee;
   const orderId = crypto.randomUUID();
 
   const { error: orderError } = await supabase.from("orders").insert({
@@ -55,7 +58,8 @@ export async function createOrder(input: {
     city: input.city?.trim() || null,
     notes: input.notes?.trim() || null,
     subtotal,
-    total: subtotal,
+    delivery_fee: deliveryFee,
+    total,
     payment_method: input.paymentMethod,
   });
 
@@ -107,7 +111,7 @@ export async function createOrder(input: {
       },
       body: JSON.stringify({
         description: `Commande YEDEI #${orderId.slice(0, 8).toUpperCase()}`,
-        amount: Math.round(subtotal),
+        amount: Math.round(total),
         currency: { iso: "XOF" },
         callback_url: callbackUrl,
         customer: {
@@ -122,12 +126,7 @@ export async function createOrder(input: {
     const createData = await createRes.json();
 
     if (!createRes.ok) {
-      console.error(
-        "FedaPay create transaction failed:",
-        createRes.status,
-        FEDAPAY_ENV,
-        JSON.stringify(createData)
-      );
+      console.error("FedaPay create transaction failed:", createRes.status, FEDAPAY_ENV, JSON.stringify(createData));
       return { error: "Impossible d'initier le paiement en ligne. Réessaie ou choisis le paiement à la livraison." };
     }
 
@@ -161,8 +160,6 @@ export async function createOrder(input: {
       return { error: "Impossible de générer le lien de paiement. Réessaie ou choisis le paiement à la livraison." };
     }
 
-    // Le client public n'a pas le droit de modifier une commande (RLS) —
-    // on utilise donc le client à privilèges élevés pour cette seule écriture.
     const serviceClient = createServiceClient();
     const { error: updateError } = await serviceClient
       .from("orders")
