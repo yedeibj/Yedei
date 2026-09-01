@@ -1,13 +1,12 @@
 "use client";
 
-import Link from "next/link";
 import { useCart } from "@/lib/cart-context";
 
 export default function CartIndicator() {
-  const { totalItems } = useCart();
+  const { totalItems, openCart } = useCart();
 
   return (
-    <Link href="/panier" className="relative inline-flex items-center">
+    <button type="button" onClick={openCart} aria-label="Voir le panier" className="relative inline-flex items-center">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
         <path d="M6 6h15l-1.5 9h-12L6 6Z" />
         <path d="M6 6 5 3H2" />
@@ -19,6 +18,6 @@ export default function CartIndicator() {
           {totalItems}
         </span>
       )}
-    </Link>
+    </button>
   );
 }
