@@ -7,28 +7,41 @@ import { createOrder } from "@/app/commande/actions";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
+type Zone = { id: string; name: string; fee: number; is_default: boolean };
+
 function formatFcfa(value: number) {
   return value.toLocaleString("fr-FR") + " FCFA";
 }
 
-export default function CheckoutForm({ deliveryFee }: { deliveryFee: number }) {
+export default function CheckoutForm({ zones }: { zones: Zone[] }) {
   const { items, totalPrice, clearCart } = useCart();
-  const total = totalPrice + deliveryFee;
 
   const [customerName, setCustomerName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
   const [address, setAddress] = useState("");
-  const [city, setCity] = useState("");
   const [notes, setNotes] = useState("");
+  const [zoneId, setZoneId] = useState(
+    zones.find((z) => z.is_default)?.id ?? zones[0]?.id ?? ""
+  );
   const [paymentMethod, setPaymentMethod] = useState<"livraison" | "fedapay">("fedapay");
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [confirmedOrderId, setConfirmedOrderId] = useState<string | null>(null);
 
+  const selectedZone = zones.find((z) => z.id === zoneId);
+  const deliveryFee = selectedZone?.fee ?? 0;
+  const total = totalPrice + deliveryFee;
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
+
+    if (!selectedZone) {
+      setError("Choisis une zone de livraison.");
+      return;
+    }
+
     setIsSubmitting(true);
 
     const result = await createOrder({
@@ -36,7 +49,7 @@ export default function CheckoutForm({ deliveryFee }: { deliveryFee: number }) {
       phone,
       email,
       address,
-      city,
+      city: selectedZone.name,
       notes,
       paymentMethod,
       deliveryFee,
@@ -68,6 +81,14 @@ export default function CheckoutForm({ deliveryFee }: { deliveryFee: number }) {
     setConfirmedOrderId(result.orderId ?? null);
   }
 
+  const buttonLabel = isSubmitting
+    ? "Traitement en cours..."
+    : paymentMethod === "fedapay"
+    ? "Continuer vers le paiement"
+    : deliveryFee > 0
+    ? `Payer les frais de livraison (${formatFcfa(deliveryFee)})`
+    : "Confirmer la commande";
+
   if (confirmedOrderId) {
     const reference = confirmedOrderId.slice(0, 8).toUpperCase();
     return (
@@ -87,7 +108,6 @@ export default function CheckoutForm({ deliveryFee }: { deliveryFee: number }) {
           </p>
           <p className="mt-4 text-sm leading-relaxed text-[#8C8579]">
             Nous allons te contacter très vite au numéro fourni pour confirmer la livraison.
-            Paiement à la livraison.
           </p>
           <Link
             href="/"
@@ -164,7 +184,7 @@ export default function CheckoutForm({ deliveryFee }: { deliveryFee: number }) {
 
             <div>
               <label className="block text-xs uppercase tracking-wide text-[#181715]">
-                Adresse de livraison
+                Adresse précise
               </label>
               <input
                 required
@@ -177,13 +197,19 @@ export default function CheckoutForm({ deliveryFee }: { deliveryFee: number }) {
 
             <div>
               <label className="block text-xs uppercase tracking-wide text-[#181715]">
-                Ville
+                Zone de livraison
               </label>
-              <input
-                value={city}
-                onChange={(e) => setCity(e.target.value)}
-                className="mt-1 w-full rounded-md border border-[#D8D3C9] px-3 py-2 text-sm outline-none focus:border-[#006400]"
-              />
+              <select
+                value={zoneId}
+                onChange={(e) => setZoneId(e.target.value)}
+                className="mt-1 w-full rounded-md border border-[#D8D3C9] bg-white px-3 py-2 text-sm outline-none focus:border-[#006400]"
+              >
+                {zones.map((zone) => (
+                  <option key={zone.id} value={zone.id}>
+                    {zone.name} — {formatFcfa(zone.fee)}
+                  </option>
+                ))}
+              </select>
             </div>
 
             <div>
@@ -223,6 +249,13 @@ export default function CheckoutForm({ deliveryFee }: { deliveryFee: number }) {
                   Paiement à la livraison
                 </label>
               </div>
+              {paymentMethod === "livraison" && deliveryFee > 0 && (
+                <p className="mt-2 text-xs text-[#8C8579]">
+                  Les frais de livraison ({formatFcfa(deliveryFee)}) sont réglés en ligne dès
+                  maintenant. Seul le prix des articles ({formatFcfa(totalPrice)}) sera à payer à
+                  la livraison.
+                </p>
+              )}
             </div>
 
             {error && <p className="text-sm text-[#DC143C]">{error}</p>}
@@ -232,11 +265,7 @@ export default function CheckoutForm({ deliveryFee }: { deliveryFee: number }) {
               disabled={isSubmitting}
               className="w-full rounded-md bg-[#006400] py-3 text-sm font-medium uppercase tracking-wide text-white transition-opacity hover:opacity-90 disabled:opacity-50"
             >
-              {isSubmitting
-                ? "Traitement en cours..."
-                : paymentMethod === "fedapay"
-                ? "Continuer vers le paiement"
-                : "Confirmer la commande"}
+              {buttonLabel}
             </button>
           </form>
         </div>
@@ -267,7 +296,7 @@ export default function CheckoutForm({ deliveryFee }: { deliveryFee: number }) {
               <span>{formatFcfa(totalPrice)}</span>
             </div>
             <div className="flex items-center justify-between text-sm text-[#8C8579]">
-              <span>Livraison</span>
+              <span>Livraison ({selectedZone?.name ?? "—"})</span>
               <span>{formatFcfa(deliveryFee)}</span>
             </div>
             <div className="flex items-center justify-between pt-2 text-lg text-[#181715]">
