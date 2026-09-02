@@ -86,11 +86,18 @@ export async function createOrder(input: {
     return { error: "Erreur lors de l'enregistrement des articles de la commande." };
   }
 
-  if (input.paymentMethod === "livraison") {
+  // Ce qui doit être payé EN LIGNE maintenant :
+  // - "fedapay" : tout (articles + livraison)
+  // - "livraison" : seulement les frais de livraison
+  const amountToChargeNow = input.paymentMethod === "fedapay" ? total : deliveryFee;
+
+  if (amountToChargeNow <= 0) {
+    // Rien à payer en ligne (ex: zone de livraison gratuite)
+    const serviceClient = createServiceClient();
+    await serviceClient.from("orders").update({ delivery_fee_paid: true, status: "confirmee" }).eq("id", orderId);
     return { orderId };
   }
 
-  // --- Paiement en ligne via FedaPay ---
   try {
     const headersList = await headers();
     const host = headersList.get("host");
@@ -100,8 +107,13 @@ export async function createOrder(input: {
 
     if (!process.env.FEDAPAY_SECRET_KEY) {
       console.error("FEDAPAY_SECRET_KEY est absente des variables d'environnement au runtime.");
-      return { error: "Impossible d'initier le paiement en ligne. Réessaie ou choisis le paiement à la livraison." };
+      return { error: "Impossible d'initier le paiement en ligne. Réessaie ou contacte-nous." };
     }
+
+    const description =
+      input.paymentMethod === "fedapay"
+        ? `Commande YEDEI #${orderId.slice(0, 8).toUpperCase()}`
+        : `Frais de livraison - Commande YEDEI #${orderId.slice(0, 8).toUpperCase()}`;
 
     const createRes = await fetch(`${FEDAPAY_BASE_URL}/v1/transactions`, {
       method: "POST",
@@ -110,8 +122,8 @@ export async function createOrder(input: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        description: `Commande YEDEI #${orderId.slice(0, 8).toUpperCase()}`,
-        amount: Math.round(total),
+        description,
+        amount: Math.round(amountToChargeNow),
         currency: { iso: "XOF" },
         callback_url: callbackUrl,
         customer: {
@@ -127,7 +139,7 @@ export async function createOrder(input: {
 
     if (!createRes.ok) {
       console.error("FedaPay create transaction failed:", createRes.status, FEDAPAY_ENV, JSON.stringify(createData));
-      return { error: "Impossible d'initier le paiement en ligne. Réessaie ou choisis le paiement à la livraison." };
+      return { error: "Impossible d'initier le paiement en ligne. Réessaie ou contacte-nous." };
     }
 
     const transaction = createData["v1/transaction"] ?? createData.transaction ?? createData;
@@ -135,7 +147,7 @@ export async function createOrder(input: {
 
     if (!transactionId) {
       console.error("FedaPay response missing transaction id:", JSON.stringify(createData));
-      return { error: "Impossible d'initier le paiement en ligne. Réessaie ou choisis le paiement à la livraison." };
+      return { error: "Impossible d'initier le paiement en ligne. Réessaie ou contacte-nous." };
     }
 
     const tokenRes = await fetch(`${FEDAPAY_BASE_URL}/v1/transactions/${transactionId}/token`, {
@@ -150,14 +162,14 @@ export async function createOrder(input: {
 
     if (!tokenRes.ok) {
       console.error("FedaPay token generation failed:", tokenRes.status, JSON.stringify(tokenData));
-      return { error: "Impossible de générer le lien de paiement. Réessaie ou choisis le paiement à la livraison." };
+      return { error: "Impossible de générer le lien de paiement. Réessaie ou contacte-nous." };
     }
 
     const paymentUrl = tokenData?.url;
 
     if (!paymentUrl) {
       console.error("FedaPay token response missing url:", JSON.stringify(tokenData));
-      return { error: "Impossible de générer le lien de paiement. Réessaie ou choisis le paiement à la livraison." };
+      return { error: "Impossible de générer le lien de paiement. Réessaie ou contacte-nous." };
     }
 
     const serviceClient = createServiceClient();
@@ -173,6 +185,6 @@ export async function createOrder(input: {
     return { orderId, paymentUrl: paymentUrl as string };
   } catch (err) {
     console.error("Erreur inattendue lors de l'appel FedaPay:", err);
-    return { error: "Erreur de connexion au service de paiement. Réessaie ou choisis le paiement à la livraison." };
+    return { error: "Erreur de connexion au service de paiement. Réessaie ou contacte-nous." };
   }
 }
