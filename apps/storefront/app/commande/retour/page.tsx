@@ -14,8 +14,10 @@ export default async function OrderReturnPage({
 }) {
   const { order: orderId, id: transactionId } = await searchParams;
   let verifiedStatus: string | null = null;
+  let paymentMethod: string | null = null;
+  let subtotal: number | null = null;
 
-  if (transactionId) {
+  if (transactionId && orderId) {
     try {
       const res = await fetch(`${FEDAPAY_BASE_URL}/v1/transactions/${transactionId}`, {
         headers: { Authorization: `Bearer ${process.env.FEDAPAY_SECRET_KEY}` },
@@ -25,13 +27,22 @@ export default async function OrderReturnPage({
       const transaction = data["v1/transaction"] ?? data.transaction ?? data;
       verifiedStatus = transaction?.status ?? null;
 
-      if (orderId && verifiedStatus) {
-        const supabase = createServiceClient();
-        const updatePayload: Record<string, string> = {
-          payment_status: verifiedStatus === "approved" ? "paye" : "impaye",
-        };
-        if (verifiedStatus === "approved") updatePayload.status = "confirmee";
+      const supabase = createServiceClient();
+      const { data: orderRow } = await supabase
+        .from("orders")
+        .select("payment_method, subtotal")
+        .eq("id", orderId)
+        .eq("fedapay_transaction_id", String(transactionId))
+        .single();
 
+      paymentMethod = orderRow?.payment_method ?? null;
+      subtotal = orderRow?.subtotal ? Number(orderRow.subtotal) : null;
+
+      if (verifiedStatus === "approved" && orderRow) {
+        const updatePayload: Record<string, any> = { delivery_fee_paid: true, status: "confirmee" };
+        if (paymentMethod === "fedapay") {
+          updatePayload.payment_status = "paye";
+        }
         await supabase
           .from("orders")
           .update(updatePayload)
@@ -45,6 +56,7 @@ export default async function OrderReturnPage({
 
   const reference = orderId ? orderId.slice(0, 8).toUpperCase() : null;
   const isApproved = verifiedStatus === "approved";
+  const isDeliveryOnly = paymentMethod === "livraison";
 
   return (
     <main>
@@ -59,7 +71,7 @@ export default async function OrderReturnPage({
         {isApproved ? (
           <>
             <h1 className="mt-4 font-display text-3xl italic text-[#181715]">
-              Paiement reçu, merci !
+              {isDeliveryOnly ? "Frais de livraison payés, merci !" : "Paiement reçu, merci !"}
             </h1>
             {reference && (
               <p className="mt-3 text-sm text-[#8C8579]">
@@ -67,7 +79,9 @@ export default async function OrderReturnPage({
               </p>
             )}
             <p className="mt-4 text-sm leading-relaxed text-[#8C8579]">
-              Ta commande est confirmée, nous préparons ta livraison.
+              {isDeliveryOnly && subtotal
+                ? `Il te reste ${subtotal.toLocaleString("fr-FR")} FCFA à régler à la livraison.`
+                : "Ta commande est confirmée, nous préparons ta livraison."}
             </p>
           </>
         ) : (
