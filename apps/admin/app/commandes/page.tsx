@@ -53,12 +53,12 @@ export default async function OrdersPage({
     <AdminShell>
       <h1 className="font-display text-2xl italic text-[#181715]">Commandes</h1>
       <p className="mt-1 text-sm text-[#8C8579]">
-        Paiement à la livraison ou en ligne via FedaPay. Marque "Payé" une fois la livraison encaissée.
+        Paiement à la livraison ou en ligne via FedaPay. Les frais de livraison sont toujours payés en ligne.
       </p>
 
       <div className="mt-6 flex flex-wrap gap-2 text-xs uppercase tracking-wide">
         
-          href="/commandes"
+        <a href="/commandes"
           className={
             !filtre || filtre === "toutes"
               ? "rounded-full bg-[#181715] px-3 py-1.5 text-white"
@@ -115,10 +115,10 @@ export default async function OrdersPage({
                   {order.payment_status === "paye" ? "Payé" : "Non payé"}
                 </span>
                 {order.payment_method === "livraison" && (
-  <span className={"rounded-full px-2 py-1 text-[10px] uppercase tracking-wide " + (order.delivery_fee_paid ? "bg-[#E8F5E9] text-[#006400]" : "bg-[#FDECEF] text-[#DC143C]")}>
-    {order.delivery_fee_paid ? "Livraison payée" : "Livraison non payée"}
-  </span>
-)}
+                  <span className={"rounded-full px-2 py-1 text-[10px] uppercase tracking-wide " + (order.delivery_fee_paid ? "bg-[#E8F5E9] text-[#006400]" : "bg-[#FDECEF] text-[#DC143C]")}>
+                    {order.delivery_fee_paid ? "Livraison payée" : "Livraison non payée"}
+                  </span>
+                )}
               </div>
             </div>
 
