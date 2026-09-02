@@ -40,7 +40,7 @@ export default async function OrdersPage({
   let query = supabase
     .from("orders")
     .select(
-      "id, customer_name, phone, email, address, city, notes, subtotal, delivery_fee, total, status, payment_status, payment_method, created_at, order_items(product_name, variant_size, variant_label, unit_price, quantity)"
+      "id, customer_name, phone, email, address, city, notes, subtotal, delivery_fee, delivery_fee_paid, total, status, payment_status, payment_method, created_at, order_items(product_name, variant_size, variant_label, unit_price, quantity)"
     )
     .order("created_at", { ascending: false });
 
@@ -114,6 +114,11 @@ export default async function OrdersPage({
                 <span className={"rounded-full px-2 py-1 text-[10px] uppercase tracking-wide " + (order.payment_status === "paye" ? "bg-[#E8F5E9] text-[#006400]" : "bg-[#FDECEF] text-[#DC143C]")}>
                   {order.payment_status === "paye" ? "Payé" : "Non payé"}
                 </span>
+                {order.payment_method === "livraison" && (
+  <span className={"rounded-full px-2 py-1 text-[10px] uppercase tracking-wide " + (order.delivery_fee_paid ? "bg-[#E8F5E9] text-[#006400]" : "bg-[#FDECEF] text-[#DC143C]")}>
+    {order.delivery_fee_paid ? "Livraison payée" : "Livraison non payée"}
+  </span>
+)}
               </div>
             </div>
 
