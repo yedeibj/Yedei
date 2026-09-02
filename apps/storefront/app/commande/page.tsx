@@ -3,13 +3,10 @@ import CheckoutForm from "@/components/CheckoutForm";
 
 export default async function CommandePage() {
   const supabase = await createServerSupabaseClient();
-  const { data: setting } = await supabase
-    .from("site_settings")
-    .select("value")
-    .eq("key", "delivery_fee")
-    .single();
+  const { data: zones } = await supabase
+    .from("delivery_zones")
+    .select("id, name, fee, is_default")
+    .order("sort_order");
 
-  const deliveryFee = setting ? Number(setting.value) : 0;
-
-  return <CheckoutForm deliveryFee={deliveryFee} />;
+  return <CheckoutForm zones={zones ?? []} />;
 }
