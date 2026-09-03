@@ -14,6 +14,24 @@ export type VariantRow = {
   colorHex?: string;
 };
 
+const COLOR_PRESETS: { name: string; hex: string }[] = [
+  { name: "Rouge", hex: "#DC143C" },
+  { name: "Bleu", hex: "#00008B" },
+  { name: "Bleu marine", hex: "#1B2A4A" },
+  { name: "Vert", hex: "#006400" },
+  { name: "Noir", hex: "#181715" },
+  { name: "Blanc", hex: "#FFFFFF" },
+  { name: "Gris", hex: "#8C8579" },
+  { name: "Beige", hex: "#D8C9A8" },
+  { name: "Marron", hex: "#6B4226" },
+  { name: "Rose", hex: "#E8A0BF" },
+  { name: "Jaune", hex: "#F4C430" },
+  { name: "Orange", hex: "#E8752D" },
+  { name: "Violet", hex: "#6A3E9C" },
+  { name: "Doré", hex: "#C9A227" },
+  { name: "Argenté", hex: "#B0B0B0" },
+];
+
 function VariantImageCell({
   value,
   onChange,
@@ -64,6 +82,79 @@ function VariantImageCell({
           if (file) handleFile(file);
         }}
       />
+    </div>
+  );
+}
+
+function ColorSelectCell({
+  color,
+  colorHex,
+  onChangeColor,
+  onChangeHex,
+}: {
+  color: string;
+  colorHex: string;
+  onChangeColor: (v: string) => void;
+  onChangeHex: (v: string) => void;
+}) {
+  const matchedPreset = COLOR_PRESETS.find((p) => p.name === color);
+  const isCustom = color !== "" && !matchedPreset;
+
+  return (
+    <div className="flex items-center gap-2">
+      <select
+        value={isCustom ? "__custom__" : color}
+        onChange={(e) => {
+          const value = e.target.value;
+          if (value === "") {
+            onChangeColor("");
+            onChangeHex("#8C8579");
+            return;
+          }
+          if (value === "__custom__") {
+            onChangeColor(color || "Personnalisée");
+            return;
+          }
+          const preset = COLOR_PRESETS.find((p) => p.name === value);
+          onChangeColor(value);
+          onChangeHex(preset?.hex ?? "#8C8579");
+        }}
+        className="w-32 rounded border border-[#D8D3C9] px-2 py-1 text-xs outline-none focus:border-[#006400]"
+      >
+        <option value="">Aucune</option>
+        {COLOR_PRESETS.map((p) => (
+          <option key={p.name} value={p.name}>
+            {p.name}
+          </option>
+        ))}
+        <option value="__custom__">Autre couleur...</option>
+      </select>
+
+      {isCustom && (
+        <>
+          <input
+            type="text"
+            value={color}
+            onChange={(e) => onChangeColor(e.target.value)}
+            placeholder="Nom"
+            className="w-20 rounded border border-[#D8D3C9] px-2 py-1 text-xs"
+          />
+          <input
+            type="color"
+            value={colorHex || "#8C8579"}
+            onChange={(e) => onChangeHex(e.target.value)}
+            className="h-7 w-8 cursor-pointer rounded border border-[#D8D3C9]"
+            title="Choisir la teinte exacte"
+          />
+        </>
+      )}
+
+      {!isCustom && color && (
+        <span
+          className="h-6 w-6 flex-shrink-0 rounded-full border border-[#D8D3C9]"
+          style={{ backgroundColor: colorHex || "#8C8579" }}
+        />
+      )}
     </div>
   );
 }
@@ -136,9 +227,9 @@ export default function VariantsEditor({
         </button>
       </div>
       <p className="mt-1 text-xs text-[#8C8579]">
-        Pour un produit avec plusieurs couleurs, crée une ligne par couleur (et par taille si besoin),
-        renseigne le champ Couleur avec le même nom sur les lignes de la même couleur (ex: "Rouge"),
-        et ajoute une photo par couleur. Laisse Couleur vide si le produit n'a qu'une seule couleur.
+        Pour un produit à plusieurs couleurs, choisis la même couleur dans la liste sur toutes les
+        lignes concernées, et ajoute une photo par couleur. Laisse "Aucune" si le produit n'a qu'une
+        seule couleur.
       </p>
 
       {variants.length > 0 && (
@@ -148,7 +239,6 @@ export default function VariantsEditor({
               <tr>
                 <th className="px-3 py-2">Photo</th>
                 <th className="px-3 py-2">Couleur</th>
-                <th className="px-3 py-2">Pastille</th>
                 <th className="px-3 py-2">Taille</th>
                 <th className="px-3 py-2">Âge / Code</th>
                 <th className="px-3 py-2">Prix (si différent)</th>
@@ -166,20 +256,11 @@ export default function VariantsEditor({
                     />
                   </td>
                   <td className="px-3 py-2">
-                    <input
-                      type="text"
-                      value={v.color ?? ""}
-                      onChange={(e) => updateRow(v.key, "color", e.target.value)}
-                      placeholder="Ex: Rouge"
-                      className="w-24 rounded border border-[#D8D3C9] px-2 py-1"
-                    />
-                  </td>
-                  <td className="px-3 py-2">
-                    <input
-                      type="color"
-                      value={v.colorHex || "#8C8579"}
-                      onChange={(e) => updateRow(v.key, "colorHex", e.target.value)}
-                      className="h-7 w-9 cursor-pointer rounded border border-[#D8D3C9]"
+                    <ColorSelectCell
+                      color={v.color ?? ""}
+                      colorHex={v.colorHex ?? "#8C8579"}
+                      onChangeColor={(val) => updateRow(v.key, "color", val)}
+                      onChangeHex={(val) => updateRow(v.key, "colorHex", val)}
                     />
                   </td>
                   <td className="px-3 py-2">
