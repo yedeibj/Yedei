@@ -24,7 +24,7 @@ export default async function EditProductPage({
       supabase.from("categories").select("id, name, parent_id").order("sort_order"),
       supabase
         .from("product_variants")
-        .select("size, sku, price, stock, image_url")
+        .select("size, sku, price, stock, image_url, color, color_hex")
         .eq("product_id", id),
       supabase
         .from("product_images")
@@ -42,6 +42,8 @@ export default async function EditProductPage({
     price: v.price ? String(v.price) : "",
     stock: v.stock ? String(v.stock) : "0",
     imageUrl: v.image_url ?? undefined,
+    color: v.color ?? "",
+    colorHex: v.color_hex ?? "#8C8579",
   }));
 
   const initialImages = (images ?? []).map((img) => ({
