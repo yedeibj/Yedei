@@ -41,6 +41,7 @@ export default async function EditProductPage({
     sku: v.sku ?? "",
     price: v.price ? String(v.price) : "",
     stock: v.stock ? String(v.stock) : "0",
+    imageUrl: v.image_url ?? undefined,
   }));
 
   const initialImages = (images ?? []).map((img) => ({
