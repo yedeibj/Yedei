@@ -112,7 +112,7 @@ export default function ProductForm({
       return;
     }
 
-    await supabase.from("product_variants").delete().eq("product_id", productId);
+        await supabase.from("product_variants").delete().eq("product_id", productId);
     if (variants.length > 0) {
       await supabase.from("product_variants").insert(
         variants
@@ -124,10 +124,11 @@ export default function ProductForm({
             price: v.price ? Number(v.price) : null,
             stock: v.stock ? Number(v.stock) : 0,
             image_url: v.imageUrl || null,
+            color: v.color?.trim() || null,
+            color_hex: v.colorHex || null,
           }))
       );
     }
-
     await supabase.from("product_images").delete().eq("product_id", productId);
     if (images.length > 0) {
       await supabase.from("product_images").insert(
