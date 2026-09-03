@@ -10,6 +10,8 @@ export type VariantRow = {
   price: string;
   stock: string;
   imageUrl?: string;
+  color?: string;
+  colorHex?: string;
 };
 
 function VariantImageCell({
@@ -78,7 +80,7 @@ export default function VariantsEditor({
   function addRow() {
     onChange([
       ...variants,
-      { key: crypto.randomUUID(), size: "", sku: "", price: "", stock: "0", imageUrl: undefined },
+      { key: crypto.randomUUID(), size: "", sku: "", price: "", stock: "0", imageUrl: undefined, color: "", colorHex: "#8C8579" },
     ]);
   }
 
@@ -96,6 +98,8 @@ export default function VariantsEditor({
       price: "",
       stock: "0",
       imageUrl: undefined,
+      color: "",
+      colorHex: "#8C8579",
     }));
     onChange([...variants, ...newRows]);
     setBulkSizes("");
@@ -132,17 +136,19 @@ export default function VariantsEditor({
         </button>
       </div>
       <p className="mt-1 text-xs text-[#8C8579]">
-        Colle plusieurs tailles séparées par des virgules pour créer toutes les lignes d'un coup.
-        Ajoute une photo sur une variante uniquement si elle a une apparence différente (ex : manche
-        longue / manche courte) — sinon laisse vide, elle utilisera les photos du produit.
+        Pour un produit avec plusieurs couleurs, crée une ligne par couleur (et par taille si besoin),
+        renseigne le champ Couleur avec le même nom sur les lignes de la même couleur (ex: "Rouge"),
+        et ajoute une photo par couleur. Laisse Couleur vide si le produit n'a qu'une seule couleur.
       </p>
 
       {variants.length > 0 && (
-        <div className="mt-3 overflow-hidden rounded-md border border-[#D8D3C9]">
+        <div className="mt-3 overflow-x-auto rounded-md border border-[#D8D3C9]">
           <table className="w-full text-left text-xs">
             <thead className="border-b border-[#D8D3C9] bg-[#F6F3EC] uppercase tracking-wide text-[#8C8579]">
               <tr>
                 <th className="px-3 py-2">Photo</th>
+                <th className="px-3 py-2">Couleur</th>
+                <th className="px-3 py-2">Pastille</th>
                 <th className="px-3 py-2">Taille</th>
                 <th className="px-3 py-2">Âge / Code</th>
                 <th className="px-3 py-2">Prix (si différent)</th>
@@ -157,6 +163,23 @@ export default function VariantsEditor({
                     <VariantImageCell
                       value={v.imageUrl}
                       onChange={(url) => updateRow(v.key, "imageUrl", url)}
+                    />
+                  </td>
+                  <td className="px-3 py-2">
+                    <input
+                      type="text"
+                      value={v.color ?? ""}
+                      onChange={(e) => updateRow(v.key, "color", e.target.value)}
+                      placeholder="Ex: Rouge"
+                      className="w-24 rounded border border-[#D8D3C9] px-2 py-1"
+                    />
+                  </td>
+                  <td className="px-3 py-2">
+                    <input
+                      type="color"
+                      value={v.colorHex || "#8C8579"}
+                      onChange={(e) => updateRow(v.key, "colorHex", e.target.value)}
+                      className="h-7 w-9 cursor-pointer rounded border border-[#D8D3C9]"
                     />
                   </td>
                   <td className="px-3 py-2">
