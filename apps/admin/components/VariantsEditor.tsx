@@ -89,13 +89,15 @@ function VariantImageCell({
 function ColorSelectCell({
   color,
   colorHex,
-  onChangeColor,
-  onChangeHex,
+  onSelectPreset,
+  onChangeCustomName,
+  onChangeCustomHex,
 }: {
   color: string;
   colorHex: string;
-  onChangeColor: (v: string) => void;
-  onChangeHex: (v: string) => void;
+  onSelectPreset: (name: string, hex: string) => void;
+  onChangeCustomName: (name: string) => void;
+  onChangeCustomHex: (hex: string) => void;
 }) {
   const matchedPreset = COLOR_PRESETS.find((p) => p.name === color);
   const isCustom = color !== "" && !matchedPreset;
@@ -107,17 +109,15 @@ function ColorSelectCell({
         onChange={(e) => {
           const value = e.target.value;
           if (value === "") {
-            onChangeColor("");
-            onChangeHex("#8C8579");
+            onSelectPreset("", "#8C8579");
             return;
           }
           if (value === "__custom__") {
-            onChangeColor(color || "Personnalisée");
+            onSelectPreset(color || "Personnalisée", colorHex || "#8C8579");
             return;
           }
           const preset = COLOR_PRESETS.find((p) => p.name === value);
-          onChangeColor(value);
-          onChangeHex(preset?.hex ?? "#8C8579");
+          onSelectPreset(value, preset?.hex ?? "#8C8579");
         }}
         className="w-32 rounded border border-[#D8D3C9] px-2 py-1 text-xs outline-none focus:border-[#006400]"
       >
@@ -135,14 +135,14 @@ function ColorSelectCell({
           <input
             type="text"
             value={color}
-            onChange={(e) => onChangeColor(e.target.value)}
+            onChange={(e) => onChangeCustomName(e.target.value)}
             placeholder="Nom"
             className="w-20 rounded border border-[#D8D3C9] px-2 py-1 text-xs"
           />
           <input
             type="color"
             value={colorHex || "#8C8579"}
-            onChange={(e) => onChangeHex(e.target.value)}
+            onChange={(e) => onChangeCustomHex(e.target.value)}
             className="h-7 w-8 cursor-pointer rounded border border-[#D8D3C9]"
             title="Choisir la teinte exacte"
           />
@@ -198,6 +198,10 @@ export default function VariantsEditor({
 
   function updateRow(key: string, field: keyof VariantRow, value: string) {
     onChange(variants.map((v) => (v.key === key ? { ...v, [field]: value } : v)));
+  }
+
+  function updateColor(key: string, color: string, colorHex: string) {
+    onChange(variants.map((v) => (v.key === key ? { ...v, color, colorHex } : v)));
   }
 
   function removeRow(key: string) {
@@ -259,8 +263,9 @@ export default function VariantsEditor({
                     <ColorSelectCell
                       color={v.color ?? ""}
                       colorHex={v.colorHex ?? "#8C8579"}
-                      onChangeColor={(val) => updateRow(v.key, "color", val)}
-                      onChangeHex={(val) => updateRow(v.key, "colorHex", val)}
+                      onSelectPreset={(name, hex) => updateColor(v.key, name, hex)}
+                      onChangeCustomName={(name) => updateRow(v.key, "color", name)}
+                      onChangeCustomHex={(hex) => updateRow(v.key, "colorHex", hex)}
                     />
                   </td>
                   <td className="px-3 py-2">
