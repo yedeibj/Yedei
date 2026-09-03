@@ -3,7 +3,16 @@
 import { useMemo, useState } from "react";
 import { useCart } from "@/lib/cart-context";
 
-type Variant = { id: string; size: string; sku: string | null; stock: number; price: number | null; imageUrl?: string | null };
+type Variant = {
+  id: string;
+  size: string;
+  sku: string | null;
+  stock: number;
+  price: number | null;
+  imageUrl?: string | null;
+  color?: string | null;
+  colorHex?: string | null;
+};
 
 function formatFcfa(value: number) {
   return value.toLocaleString("fr-FR") + " FCFA";
@@ -29,11 +38,29 @@ export default function AddToCartPanel({
   onVariantChange?: (imageUrl: string | null) => void;
 }) {
   const { addItem, openCart } = useCart();
+
+  const colors = useMemo(() => {
+    const seen = new Map<string, string | null>();
+    for (const v of variants) {
+      if (v.color && !seen.has(v.color)) seen.set(v.color, v.colorHex ?? null);
+    }
+    return Array.from(seen.entries()).map(([name, hex]) => ({ name, hex }));
+  }, [variants]);
+
+  const hasColors = colors.length > 0;
+
+  const [selectedColor, setSelectedColor] = useState<string | null>(
+    hasColors ? colors[0].name : null
+  );
   const [selectedVariantId, setSelectedVariantId] = useState<string | null>(
     variants.length === 0 ? "unique" : null
   );
   const [quantity, setQuantity] = useState(1);
   const [error, setError] = useState<string | null>(null);
+
+  const visibleVariants = hasColors
+    ? variants.filter((v) => v.color === selectedColor)
+    : variants;
 
   function effectivePrice(variant: Variant) {
     return variant.price ?? basePrice;
@@ -42,15 +69,28 @@ export default function AddToCartPanel({
   const selectedVariant = variants.find((v) => v.id === selectedVariantId);
 
   const priceRange = useMemo(() => {
-    if (variants.length === 0) return { min: basePrice, max: basePrice };
-    const prices = variants.map(effectivePrice);
+    const pool = hasColors ? visibleVariants : variants;
+    if (pool.length === 0) return { min: basePrice, max: basePrice };
+    const prices = pool.map(effectivePrice);
     return { min: Math.min(...prices), max: Math.max(...prices) };
-  }, [variants, basePrice]);
+  }, [variants, visibleVariants, hasColors, basePrice]);
 
   const displayedPrice = selectedVariant ? effectivePrice(selectedVariant) : null;
 
+  function handleSelectColor(colorName: string, hex: string | null) {
+    setSelectedColor(colorName);
+    setSelectedVariantId(null);
+    setError(null);
+    const preview = variants.find((v) => v.color === colorName && v.imageUrl);
+    onVariantChange?.(preview?.imageUrl ?? null);
+  }
+
   function handleAddToCart() {
-    if (variants.length > 0 && !selectedVariantId) {
+    if (hasColors && !selectedColor) {
+      setError("Choisis une couleur avant d'ajouter au panier.");
+      return;
+    }
+    if (visibleVariants.length > 0 && !selectedVariantId) {
       setError("Choisis une taille avant d'ajouter au panier.");
       return;
     }
@@ -58,6 +98,8 @@ export default function AddToCartPanel({
 
     const finalVariant = selectedVariant;
     const finalPrice = finalVariant ? effectivePrice(finalVariant) : basePrice;
+    const sizeLabel = finalVariant?.size ?? "Taille unique";
+    const colorLabel = finalVariant?.color ? finalVariant.color + " — " : "";
 
     addItem({
       productId,
@@ -65,7 +107,7 @@ export default function AddToCartPanel({
       name,
       price: finalPrice,
       variantId: selectedVariantId ?? "unique",
-      size: finalVariant?.size ?? "Taille unique",
+      size: colorLabel + sizeLabel,
       variantLabel: finalVariant?.sku ?? undefined,
       quantity,
       imageUrl,
@@ -91,11 +133,37 @@ export default function AddToCartPanel({
         )}
       </div>
 
-      {variants.length > 0 && (
-        <div className="mt-8">
+      {hasColors && (
+        <div className="mt-6">
+          <p className="text-xs uppercase tracking-wide text-[#181715]">
+            Couleur{selectedColor && <span className="normal-case text-[#8C8579]"> — {selectedColor}</span>}
+          </p>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {colors.map((c) => {
+              const isSelected = selectedColor === c.name;
+              return (
+                <button
+                  key={c.name}
+                  type="button"
+                  onClick={() => handleSelectColor(c.name, c.hex)}
+                  aria-label={c.name}
+                  title={c.name}
+                  className={`h-9 w-9 rounded-full border-2 transition-all ${
+                    isSelected ? "border-[#006400] scale-110" : "border-[#D8D3C9]"
+                  }`}
+                  style={{ backgroundColor: c.hex || "#D8D3C9" }}
+                />
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {visibleVariants.length > 0 && (
+        <div className="mt-6">
           <p className="text-xs uppercase tracking-wide text-[#181715]">Taille</p>
           <div className="mt-2 flex flex-wrap gap-2">
-            {variants.map((v) => {
+            {visibleVariants.map((v) => {
               const isOutOfStock = v.stock <= 0;
               const isSelected = selectedVariantId === v.id;
               return (
@@ -103,7 +171,7 @@ export default function AddToCartPanel({
                   key={v.id}
                   type="button"
                   disabled={isOutOfStock}
-                onClick={() => {
+                  onClick={() => {
                     setSelectedVariantId(v.id);
                     setError(null);
                     onVariantChange?.(v.imageUrl ?? null);
