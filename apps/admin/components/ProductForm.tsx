@@ -123,6 +123,7 @@ export default function ProductForm({
             sku: v.sku.trim() || null,
             price: v.price ? Number(v.price) : null,
             stock: v.stock ? Number(v.stock) : 0,
+            image_url: v.imageUrl || null,
           }))
       );
     }
