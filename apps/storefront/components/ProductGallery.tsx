@@ -1,19 +1,27 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 type GalleryImage = { url: string };
 
 export default function ProductGallery({
   images,
   productName,
+  variantImageUrl,
 }: {
   images: GalleryImage[];
   productName: string;
+  variantImageUrl?: string | null;
 }) {
   const [activeIndex, setActiveIndex] = useState(0);
 
-  if (images.length === 0) {
+  useEffect(() => {
+    if (variantImageUrl) setActiveIndex(-1);
+  }, [variantImageUrl]);
+
+  const mainImageUrl = activeIndex === -1 ? variantImageUrl : images[activeIndex]?.url;
+
+  if (images.length === 0 && !mainImageUrl) {
     return <div className="aspect-[3/4] w-full rounded-md bg-white" />;
   }
 
@@ -37,11 +45,9 @@ export default function ProductGallery({
       )}
 
       <div className="aspect-[3/4] flex-1 overflow-hidden rounded-md border border-[#F0EDE5] bg-white">
-        <img
-          src={images[activeIndex].url}
-          alt={productName}
-          className="h-full w-full object-contain"
-        />
+        {mainImageUrl && (
+          <img src={mainImageUrl} alt={productName} className="h-full w-full object-contain" />
+        )}
       </div>
     </div>
   );
