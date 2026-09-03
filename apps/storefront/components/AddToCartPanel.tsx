@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { useCart } from "@/lib/cart-context";
 
-type Variant = { id: string; size: string; sku: string | null; stock: number; price: number | null };
+type Variant = { id: string; size: string; sku: string | null; stock: number; price: number | null; imageUrl?: string | null };
 
 function formatFcfa(value: number) {
   return value.toLocaleString("fr-FR") + " FCFA";
@@ -17,6 +17,7 @@ export default function AddToCartPanel({
   compareAtPrice,
   imageUrl,
   variants,
+  onVariantChange,
 }: {
   productId: string;
   slug: string;
@@ -25,6 +26,7 @@ export default function AddToCartPanel({
   compareAtPrice?: number | null;
   imageUrl?: string;
   variants: Variant[];
+  onVariantChange?: (imageUrl: string | null) => void;
 }) {
   const { addItem, openCart } = useCart();
   const [selectedVariantId, setSelectedVariantId] = useState<string | null>(
@@ -101,9 +103,10 @@ export default function AddToCartPanel({
                   key={v.id}
                   type="button"
                   disabled={isOutOfStock}
-                  onClick={() => {
+                onClick={() => {
                     setSelectedVariantId(v.id);
                     setError(null);
+                    onVariantChange?.(v.imageUrl ?? null);
                   }}
                   className={`flex flex-col items-center rounded-md border px-4 py-2 text-sm transition-colors ${
                     isOutOfStock
