@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
+import { createClient as createBrowserSupabaseClient } from "@yedei/database/client";
 
 export type VariantRow = {
   key: string;
@@ -8,7 +9,62 @@ export type VariantRow = {
   sku: string;
   price: string;
   stock: string;
+  imageUrl?: string;
 };
+
+function VariantImageCell({
+  value,
+  onChange,
+}: {
+  value: string | undefined;
+  onChange: (url: string) => void;
+}) {
+  const [isUploading, setIsUploading] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  async function handleFile(file: File) {
+    setIsUploading(true);
+    const supabase = createBrowserSupabaseClient();
+    const path = `variants/${Date.now()}-${Math.random().toString(36).slice(2)}-${file.name}`;
+    const { error } = await supabase.storage.from("products").upload(path, file);
+    if (!error) {
+      const { data } = supabase.storage.from("products").getPublicUrl(path);
+      onChange(data.publicUrl);
+    }
+    setIsUploading(false);
+  }
+
+  return (
+    <div className="flex items-center gap-1">
+      {value ? (
+        <img
+          src={value}
+          alt=""
+          onClick={() => inputRef.current?.click()}
+          className="h-9 w-9 cursor-pointer rounded border border-[#D8D3C9] object-cover"
+        />
+      ) : (
+        <button
+          type="button"
+          onClick={() => inputRef.current?.click()}
+          className="flex h-9 w-9 items-center justify-center rounded border border-dashed border-[#D8D3C9] text-[9px] text-[#8C8579] hover:border-[#006400]"
+        >
+          {isUploading ? "..." : "+"}
+        </button>
+      )}
+      <input
+        ref={inputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={(e) => {
+          const file = e.target.files?.[0];
+          if (file) handleFile(file);
+        }}
+      />
+    </div>
+  );
+}
 
 export default function VariantsEditor({
   variants,
@@ -22,7 +78,7 @@ export default function VariantsEditor({
   function addRow() {
     onChange([
       ...variants,
-      { key: crypto.randomUUID(), size: "", sku: "", price: "", stock: "0" },
+      { key: crypto.randomUUID(), size: "", sku: "", price: "", stock: "0", imageUrl: undefined },
     ]);
   }
 
@@ -39,6 +95,7 @@ export default function VariantsEditor({
       sku: "",
       price: "",
       stock: "0",
+      imageUrl: undefined,
     }));
     onChange([...variants, ...newRows]);
     setBulkSizes("");
@@ -76,6 +133,8 @@ export default function VariantsEditor({
       </div>
       <p className="mt-1 text-xs text-[#8C8579]">
         Colle plusieurs tailles séparées par des virgules pour créer toutes les lignes d'un coup.
+        Ajoute une photo sur une variante uniquement si elle a une apparence différente (ex : manche
+        longue / manche courte) — sinon laisse vide, elle utilisera les photos du produit.
       </p>
 
       {variants.length > 0 && (
@@ -83,6 +142,7 @@ export default function VariantsEditor({
           <table className="w-full text-left text-xs">
             <thead className="border-b border-[#D8D3C9] bg-[#F6F3EC] uppercase tracking-wide text-[#8C8579]">
               <tr>
+                <th className="px-3 py-2">Photo</th>
                 <th className="px-3 py-2">Taille</th>
                 <th className="px-3 py-2">Âge / Code</th>
                 <th className="px-3 py-2">Prix (si différent)</th>
@@ -93,6 +153,12 @@ export default function VariantsEditor({
             <tbody>
               {variants.map((v) => (
                 <tr key={v.key} className="border-b border-[#F0EDE5] last:border-0">
+                  <td className="px-3 py-2">
+                    <VariantImageCell
+                      value={v.imageUrl}
+                      onChange={(url) => updateRow(v.key, "imageUrl", url)}
+                    />
+                  </td>
                   <td className="px-3 py-2">
                     <input
                       type="text"
