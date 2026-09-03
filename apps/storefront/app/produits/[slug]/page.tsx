@@ -3,8 +3,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import ProductGallery from "@/components/ProductGallery";
-import AddToCartPanel from "@/components/AddToCartPanel";
+import ProductDetail from "@/components/ProductDetail";
 
 export default async function ProductPage({
   params,
@@ -17,7 +16,7 @@ export default async function ProductPage({
   const { data: product } = await supabase
     .from("products")
     .select(
-      "id, name, description, price, compare_at_price, categories(name, slug), product_images(url, sort_order), product_variants(id, size, sku, stock, price)"
+      "id, name, description, price, compare_at_price, categories(name, slug), product_images(url, sort_order), product_variants(id, size, sku, stock, price, image_url)"
     )
     .eq("slug", slug)
     .eq("is_active", true)
@@ -34,6 +33,7 @@ export default async function ProductPage({
     sku: v.sku,
     stock: v.stock,
     price: v.price !== null && v.price !== undefined ? Number(v.price) : null,
+    imageUrl: v.image_url ?? null,
   }));
   const category = Array.isArray(product.categories) ? product.categories[0] : product.categories;
 
@@ -55,36 +55,16 @@ export default async function ProductPage({
         <span className="text-[#181715]">{product.name}</span>
       </div>
 
-      <div className="grid grid-cols-1 gap-10 px-6 pb-16 sm:px-12 lg:grid-cols-2">
-        <ProductGallery images={images} productName={product.name} />
-
-        <div>
-          <h1 className="font-display text-3xl italic text-[#181715]">{product.name}</h1>
-
-          <AddToCartPanel
-            productId={product.id}
-            slug={slug}
-            name={product.name}
-            basePrice={Number(product.price)}
-            compareAtPrice={product.compare_at_price ? Number(product.compare_at_price) : null}
-            imageUrl={images[0]?.url}
-            variants={variants}
-          />
-
-          {product.description && (
-            <p className="mt-8 border-t border-[#D8D3C9] pt-6 text-sm leading-relaxed text-[#8C8579]">
-              {product.description}
-            </p>
-          )}
-
-          <div className="mt-8 grid grid-cols-2 gap-4 border-t border-[#D8D3C9] pt-6 text-xs text-[#8C8579] sm:grid-cols-4">
-            <p className="font-medium text-[#181715]">Tissus de qualité</p>
-            <p className="font-medium text-[#181715]">Livraison rapide</p>
-            <p className="font-medium text-[#181715]">Paiement sécurisé</p>
-            <p className="font-medium text-[#181715]">Retours simplifiés</p>
-          </div>
-        </div>
-      </div>
+      <ProductDetail
+        productId={product.id}
+        slug={slug}
+        name={product.name}
+        description={product.description}
+        basePrice={Number(product.price)}
+        compareAtPrice={product.compare_at_price ? Number(product.compare_at_price) : null}
+        images={images}
+        variants={variants}
+      />
 
       <Footer />
     </main>
