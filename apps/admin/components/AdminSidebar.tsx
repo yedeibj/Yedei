@@ -16,6 +16,7 @@ const links = [
   { label: "Zones de livraison", href: "/zones-livraison" },
   { label: "Réglages", href: "/reglages" },
   { href: "/avis", label: "Avis clients" },
+  { label: "Pages légales", href: "/pages-legales" },
 ];
 
 export default function AdminSidebar() {
