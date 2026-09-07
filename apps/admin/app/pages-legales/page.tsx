@@ -95,8 +95,10 @@ export default async function LegalPagesPage() {
                   rows={8}
                   className="mt-1 w-full rounded-md border border-[#D8D3C9] px-2 py-1.5 text-sm outline-none focus:border-[#006400]"
                 />
-                <p className="mt-1 text-[10px] text-[#8C8579]">
-                  Laisse une ligne vide entre deux paragraphes pour les séparer sur le site.
+                                <p className="mt-1 text-[10px] text-[#8C8579]">
+                  Laisse une ligne vide entre deux paragraphes. Pour un titre de section, commence
+                  la ligne par "## " (ex: "## Livraison et délais"). Pour du texte en gras, entoure-le
+                  d'étoiles (ex: "**important**").
                 </p>
               </div>
               <div className="flex items-center justify-between pt-1">
