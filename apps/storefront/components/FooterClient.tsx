@@ -1,5 +1,6 @@
 "use client";
 
+import InstallAppButtons from "./InstallAppButtons";
 import { useState } from "react";
 import Link from "next/link";
 
@@ -110,7 +111,7 @@ export default function FooterClient({
           </ul>
         </div>
 
-        <div className="mt-12 border-t border-paper/15 pt-10">
+                <div className="mt-12 border-t border-paper/15 pt-10">
           <h3 className="font-display text-xl italic">
             Télécharger l&apos;application YEDEI
           </h3>
@@ -118,10 +119,7 @@ export default function FooterClient({
             Installez YEDEI directement depuis le site, sans passer par une
             boutique d&apos;applications.
           </p>
-          <div className="mt-5 flex flex-wrap gap-4">
-            <a href="/app/yedei-android.apk" className={appLinkClass}>Télécharger sur Android</a>
-            <a href="/installation-iphone" className={appLinkClass}>Télécharger sur iPhone</a>
-          </div>
+          <InstallAppButtons />
         </div>
 
         <p className="mt-12 text-xs text-paper/40">
