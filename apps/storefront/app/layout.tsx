@@ -3,6 +3,7 @@ import { Fraunces, Manrope } from "next/font/google";
 import "./globals.css";
 import PromoBar from "@/components/PromoBar";
 import { CartProvider } from "@/lib/cart-context";
+import CartDrawer from "@/components/CartDrawer";
 import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
 
 const fraunces = Fraunces({
@@ -24,9 +25,9 @@ export const revalidate = 60;
 
 export const metadata: Metadata = {
   title: "YEDEI — L'élégance pour toute la famille",
-  manifest: "/manifest.json",
   description:
     "YEDEI habille hommes, femmes, enfants et bébés avec des collections élégantes pensées pour chaque génération.",
+  manifest: "/manifest.json",
   openGraph: {
     title: "YEDEI — L'élégance pour toute la famille",
     description:
@@ -53,7 +54,7 @@ export default function RootLayout({
     <html lang="fr" className={`${fraunces.variable} ${manrope.variable}`}>
       <body className="font-sans antialiased">
         <PromoBar />
-                <CartProvider>
+        <CartProvider>
           {children}
           <CartDrawer />
         </CartProvider>
