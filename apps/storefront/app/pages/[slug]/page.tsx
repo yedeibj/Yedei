@@ -20,7 +20,8 @@ export default async function LegalPage({
 
   if (!page) notFound();
 
-  const paragraphs = (page.content ?? "").split(/\n\s*\n/).filter((p: string) => p.trim());
+  const rawParagraphs: string[] = (page.content ?? "").split(/\n\s*\n/);
+  const paragraphs: string[] = rawParagraphs.filter((p: string) => p.trim().length > 0);
 
   return (
     <main>
@@ -29,7 +30,7 @@ export default async function LegalPage({
         <h1 className="font-display text-3xl italic text-[#181715]">{page.title}</h1>
         <div className="mt-6 space-y-4 text-sm leading-relaxed text-[#8C8579]">
           {paragraphs.length > 0 ? (
-            paragraphs.map((p, i) => <p key={i}>{p}</p>)
+            paragraphs.map((p: string, i: number) => <p key={i}>{p}</p>)
           ) : (
             <p>Contenu à venir.</p>
           )}
