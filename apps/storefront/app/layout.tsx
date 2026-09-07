@@ -3,7 +3,7 @@ import { Fraunces, Manrope } from "next/font/google";
 import "./globals.css";
 import PromoBar from "@/components/PromoBar";
 import { CartProvider } from "@/lib/cart-context";
-import CartDrawer from "@/components/CartDrawer";
+import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
 
 const fraunces = Fraunces({
   subsets: ["latin"],
