@@ -26,6 +26,14 @@ export default function HeaderNav({ categories }: { categories: NavCategory[] })
         {/* Desktop nav */}
         <nav aria-label="Navigation principale" className="hidden md:block">
           <ul className="flex items-center gap-10">
+            <li>
+              <Link
+                href="/"
+                className="text-sm uppercase tracking-widest2 text-ink/80 transition-colors hover:text-ink"
+              >
+                Accueil
+              </Link>
+            </li>
             {categories.map((cat) => (
               <li key={cat.id} className="group relative">
                 <Link
@@ -92,7 +100,16 @@ export default function HeaderNav({ categories }: { categories: NavCategory[] })
           aria-label="Navigation mobile"
           className="border-t border-stone-light/60 bg-paper px-6 py-6 md:hidden"
         >
-          <ul className="flex flex-col gap-1">
+                   <ul className="flex flex-col gap-1">
+            <li className="border-b border-stone-light/40 py-2">
+              <Link
+                href="/"
+                onClick={() => setMenuOpen(false)}
+                className="font-display text-xl text-ink"
+              >
+                Accueil
+              </Link>
+            </li>
             {categories.map((cat) => {
               const isSubOpen = openMobileSubmenu === cat.id;
               return (
