@@ -24,6 +24,7 @@ export const revalidate = 60;
 
 export const metadata: Metadata = {
   title: "YEDEI — L'élégance pour toute la famille",
+  manifest: "/manifest.json",
   description:
     "YEDEI habille hommes, femmes, enfants et bébés avec des collections élégantes pensées pour chaque génération.",
   openGraph: {
@@ -52,10 +53,11 @@ export default function RootLayout({
     <html lang="fr" className={`${fraunces.variable} ${manrope.variable}`}>
       <body className="font-sans antialiased">
         <PromoBar />
-        <CartProvider>
+                <CartProvider>
           {children}
           <CartDrawer />
         </CartProvider>
+        <ServiceWorkerRegister />
       </body>
     </html>
   );
