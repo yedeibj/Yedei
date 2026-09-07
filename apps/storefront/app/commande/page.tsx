@@ -1,4 +1,6 @@
 import { createClient as createServerSupabaseClient } from "@yedei/database/server";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 import CheckoutForm from "@/components/CheckoutForm";
 
 export default async function CommandePage() {
@@ -8,5 +10,11 @@ export default async function CommandePage() {
     .select("id, name, fee, is_default")
     .order("sort_order");
 
-  return <CheckoutForm zones={zones ?? []} />;
+  return (
+    <main>
+      <Header />
+      <CheckoutForm zones={zones ?? []} />
+      <Footer />
+    </main>
+  );
 }
