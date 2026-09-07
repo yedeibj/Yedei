@@ -20,7 +20,7 @@ export default async function LegalPage({
 
   if (!page) notFound();
 
-  const paragraphs = (page.content ?? "").split(/\n\s*\n/).filter((p) => p.trim());
+  const paragraphs = (page.content ?? "").split(/\n\s*\n/).filter((p: string) => p.trim());
 
   return (
     <main>
