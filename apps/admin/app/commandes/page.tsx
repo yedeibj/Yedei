@@ -97,8 +97,9 @@ export default async function OrdersPage({
                 <p className="text-xs text-[#8C8579]">
                   {order.phone}{order.email ? " · " + order.email : ""}
                 </p>
+                <p className="text-xs text-[#8C8579]">{order.address}</p>
                 <p className="text-xs text-[#8C8579]">
-                  {order.address}{order.city ? ", " + order.city : ""}
+                  Zone de livraison : <span className="text-[#181715]">{order.city || "Non renseignée"}</span>
                 </p>
                 <p className="text-xs text-[#8C8579]">
                   Paiement : {order.payment_method === "fedapay" ? "En ligne (FedaPay)" : "À la livraison"}
