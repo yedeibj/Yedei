@@ -27,20 +27,27 @@ export default async function CategoryProducts({
 
   const categoryIds = [category.id, ...(children ?? []).map((c) => c.id)];
 
-  const { data: products } = await supabase
+  const { data } = await supabase
     .from("products")
-    .select("id, slug, name, price, is_new, is_best_seller, product_images(url)")
+    .select("id, slug, name, price, is_new, is_best_seller, product_images(url, sort_order)")
     .in("category_id", categoryIds)
     .eq("is_active", true)
     .order("created_at", { ascending: false })
     .limit(12);
+
+  const products = (data ?? []).map((p: any) => ({
+    ...p,
+    product_images: [...(p.product_images ?? [])].sort(
+      (a: any, b: any) => a.sort_order - b.sort_order
+    ),
+  }));
 
   return (
     <ProductRail
       title={title}
       subtitle={subtitle}
       seeAllHref={`/collections/${categorySlug}`}
-      products={products ?? []}
+      products={products}
     />
   );
 }
