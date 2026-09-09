@@ -46,12 +46,19 @@ export default async function CollectionPage({
 
   const categoryIds = [category.id, ...(children ?? []).map((c) => c.id)];
 
-  const { data: products } = await supabase
+    const { data: rawProducts } = await supabase
     .from("products")
-    .select("id, slug, name, price, is_new, is_best_seller, product_images(url)")
+    .select("id, slug, name, price, is_new, is_best_seller, product_images(url, sort_order)")
     .in("category_id", categoryIds)
     .eq("is_active", true)
     .order("created_at", { ascending: false });
+
+  const products = (rawProducts ?? []).map((p: any) => ({
+    ...p,
+    product_images: [...(p.product_images ?? [])].sort(
+      (a: any, b: any) => a.sort_order - b.sort_order
+    ),
+  }));
 
   return (
     <main>
