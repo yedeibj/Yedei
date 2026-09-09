@@ -135,7 +135,7 @@ export default async function CollectionPage({
 
       {/* Grille produits */}
       <div className="px-6 pb-16 sm:px-12">
-        {!products || products.length === 0 ? (
+        {products.length === 0 ? (
           <p className="py-16 text-center text-sm text-[#8C8579]">
             Aucun produit disponible dans cette collection pour le moment.
           </p>
