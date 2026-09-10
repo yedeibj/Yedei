@@ -140,9 +140,12 @@ export default function ProductForm({
       );
     }
 
-    setIsSaving(false);
+        setIsSaving(false);
     setSavedSlug(slug);
     router.refresh();
+    if (isEditing) {
+      window.location.reload();
+    }
   }
 
   async function handleDelete() {
