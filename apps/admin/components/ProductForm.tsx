@@ -112,27 +112,21 @@ export default function ProductForm({
       return;
     }
 
-               await supabase.from("product_variants").delete().eq("product_id", productId);
-    const validVariants = variants.filter((v) => {
-      const hasSize = v.size.trim().length > 0;
-      const hasColor = Boolean(v.color && v.color.trim().length > 0);
-      const hasSku = v.sku.trim().length > 0;
-      const hasPrice = v.price.trim().length > 0;
-      const hasImage = Boolean(v.imageUrl);
-      return hasSize || hasColor || hasSku || hasPrice || hasImage;
-    });
-    if (validVariants.length > 0) {
+                  await supabase.from("product_variants").delete().eq("product_id", productId);
+    if (variants.length > 0) {
       await supabase.from("product_variants").insert(
-        validVariants.map((v) => ({
-          product_id: productId,
-          size: v.size.trim() || "Unique",
-          sku: v.sku.trim() || null,
-          price: v.price ? Number(v.price) : null,
-          stock: v.stock ? Number(v.stock) : 0,
-          image_url: v.imageUrl || null,
-          color: v.color?.trim() || null,
-          color_hex: v.colorHex || null,
-        }))
+        variants
+          .filter((v) => v.size.trim())
+          .map((v) => ({
+            product_id: productId,
+            size: v.size.trim(),
+            sku: v.sku.trim() || null,
+            price: v.price ? Number(v.price) : null,
+            stock: v.stock ? Number(v.stock) : 0,
+            image_url: v.imageUrl || null,
+            color: v.color?.trim() || null,
+            color_hex: v.colorHex || null,
+          }))
       );
     }
     await supabase.from("product_images").delete().eq("product_id", productId);
