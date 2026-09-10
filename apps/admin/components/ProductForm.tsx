@@ -112,10 +112,15 @@ export default function ProductForm({
       return;
     }
 
-            await supabase.from("product_variants").delete().eq("product_id", productId);
-    const validVariants = variants.filter(
-      (v) => v.size.trim() || (v.color && v.color.trim())
-    );
+               await supabase.from("product_variants").delete().eq("product_id", productId);
+    const validVariants = variants.filter((v) => {
+      const hasSize = v.size.trim().length > 0;
+      const hasColor = Boolean(v.color && v.color.trim().length > 0);
+      const hasSku = v.sku.trim().length > 0;
+      const hasPrice = v.price.trim().length > 0;
+      const hasImage = Boolean(v.imageUrl);
+      return hasSize || hasColor || hasSku || hasPrice || hasImage;
+    });
     if (validVariants.length > 0) {
       await supabase.from("product_variants").insert(
         validVariants.map((v) => ({
