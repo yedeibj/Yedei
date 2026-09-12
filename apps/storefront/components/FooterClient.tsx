@@ -1,8 +1,8 @@
 "use client";
 
-import InstallAppButtons from "./InstallAppButtons";
 import { useState } from "react";
 import Link from "next/link";
+import InstallAppButtons from "./InstallAppButtons";
 
 type FooterCategory = {
   id: string;
@@ -19,8 +19,6 @@ const socialLinks = [
   { label: "TikTok", href: "https://tiktok.com" },
 ];
 
-const appLinkClass = "border border-paper/40 px-6 py-3 text-xs uppercase tracking-widest2 transition-colors hover:bg-paper hover:text-ink";
-
 export default function FooterClient({
   categories,
   infoLinks,
@@ -29,10 +27,12 @@ export default function FooterClient({
   infoLinks: InfoLink[];
 }) {
   const [openSlug, setOpenSlug] = useState<string | null>(null);
+  const [legalOpen, setLegalOpen] = useState(false);
 
   return (
     <footer className="bg-ink text-paper">
       <div className="mx-auto max-w-container px-6 py-16 md:px-10">
+        {/* Logo + description */}
         <div className="mb-12 flex flex-col gap-6 border-b border-paper/15 pb-12 md:flex-row md:items-center md:justify-between">
           <img src="/logo-white.png" alt="YEDEI" className="h-12 w-auto self-start" />
           <p className="max-w-sm text-sm text-paper/60">
@@ -41,6 +41,7 @@ export default function FooterClient({
           </p>
         </div>
 
+        {/* Catégories — accordéon mobile / colonnes desktop */}
         <div className="grid gap-8 md:grid-cols-4">
           {categories.map((category) => {
             const isOpen = openSlug === category.slug;
@@ -88,38 +89,70 @@ export default function FooterClient({
           })}
         </div>
 
-        <div className="mt-12 flex flex-col gap-8 border-t border-paper/15 pt-10 sm:flex-row sm:justify-between">
-          <ul className="flex flex-wrap gap-x-6 gap-y-2 text-sm text-paper/70">
-            {infoLinks.map((link) => (
+        {/* Pages légales — une ligne sur desktop, accordéon sur mobile */}
+        {infoLinks.length > 0 && (
+          <div className="mt-12 border-t border-paper/15 pt-8">
+            {/* Mobile : accordéon */}
+            <div className="md:hidden">
+              <button
+                type="button"
+                onClick={() => setLegalOpen((open) => !open)}
+                className="flex w-full items-center justify-between py-2 text-left"
+                aria-expanded={legalOpen}
+              >
+                <span className="font-display text-lg italic">Informations légales</span>
+                <span aria-hidden="true">{legalOpen ? "−" : "+"}</span>
+              </button>
+              <ul
+                className={`flex flex-col gap-2 overflow-hidden text-sm text-paper/70 transition-all ${
+                  legalOpen ? "mt-3 max-h-96 opacity-100" : "max-h-0 opacity-0"
+                }`}
+              >
+                {infoLinks.map((link) => (
+                  <li key={link.href}>
+                    <Link href={link.href} className="hover:text-paper">
+                      {link.label}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Desktop : une seule ligne */}
+            <ul className="hidden flex-wrap items-center gap-x-6 gap-y-2 text-sm text-paper/70 md:flex">
+              {infoLinks.map((link) => (
+                <li key={link.href}>
+                  <Link href={link.href} className="hover:text-paper">
+                    {link.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        {/* Téléchargement app + réseaux sociaux, côte à côte sur desktop */}
+        <div className="mt-8 flex flex-col gap-8 border-t border-paper/15 pt-10 md:flex-row md:items-start md:justify-between">
+          <div>
+            <h3 className="font-display text-xl italic">
+              Télécharger l&apos;application YEDEI
+            </h3>
+            <p className="mt-2 max-w-md text-sm text-paper/60">
+              Installez YEDEI directement depuis le site, sans passer par une
+              boutique d&apos;applications.
+            </p>
+            <InstallAppButtons />
+          </div>
+
+          <ul className="flex flex-wrap gap-x-6 gap-y-2 text-sm text-paper/70 md:flex-col md:items-end md:gap-2">
+            {socialLinks.map((link) => (
               <li key={link.href}>
-                <Link href={link.href} className="hover:text-paper">
+                <a href={link.href} target="_blank" rel="noreferrer" className="hover:text-paper">
                   {link.label}
-                </Link>
+                </a>
               </li>
             ))}
           </ul>
-          <ul className="flex flex-wrap gap-x-6 gap-y-2 text-sm text-paper/70">
-            {socialLinks.map((link) => {
-              return (
-                <li key={link.href}>
-                  <a href={link.href} target="_blank" rel="noreferrer" className="hover:text-paper">
-                    {link.label}
-                  </a>
-                </li>
-              );
-            })}
-          </ul>
-        </div>
-
-                <div className="mt-12 border-t border-paper/15 pt-10">
-          <h3 className="font-display text-xl italic">
-            Télécharger l&apos;application YEDEI
-          </h3>
-          <p className="mt-2 max-w-md text-sm text-paper/60">
-            Installez YEDEI directement depuis le site, sans passer par une
-            boutique d&apos;applications.
-          </p>
-          <InstallAppButtons />
         </div>
 
         <p className="mt-12 text-xs text-paper/40">
