@@ -12,6 +12,7 @@ export default async function ContactPage() {
 
   const phone = settings?.find((s) => s.key === "company_phone")?.value;
   const address = settings?.find((s) => s.key === "company_address")?.value;
+  const telHref = phone ? "tel:" + phone.replace(/\s+/g, "") : "";
 
   return (
     <main>
@@ -35,10 +36,7 @@ export default async function ContactPage() {
             {phone && (
               <div>
                 <p className="text-xs uppercase tracking-wide text-[#8C8579]">Téléphone</p>
-                
-                  href={`tel:${phone.replace(/\s+/g, "")}`}
-                  className="mt-1 block font-display text-xl italic text-[#181715] hover:text-[#006400]"
-                >
+                <a href={telHref} className="mt-1 block font-display text-xl italic text-[#181715] hover:text-[#006400]">
                   {phone}
                 </a>
               </div>
