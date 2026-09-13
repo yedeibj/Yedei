@@ -7,7 +7,6 @@ async function updateSettings(formData: FormData) {
   const supabase = await createServerSupabaseClient();
 
   const entries: [string, string][] = [
-    ["delivery_fee", String(formData.get("delivery_fee") ?? "0").trim()],
     ["company_phone", String(formData.get("company_phone") ?? "").trim()],
     ["company_address", String(formData.get("company_address") ?? "").trim()],
   ];
@@ -59,24 +58,6 @@ export default async function SettingsPage() {
                 className="mt-1 w-full rounded-md border border-[#D8D3C9] px-3 py-2 text-sm outline-none focus:border-[#006400]"
               />
             </div>
-          </div>
-        </div>
-
-        <div className="rounded-md border border-[#D8D3C9] p-5">
-          <h2 className="text-sm font-medium uppercase tracking-wide text-[#181715]">
-            Frais de livraison (réglage général, non utilisé si des zones sont configurées)
-          </h2>
-          <div className="mt-4">
-            <label className="block text-[10px] uppercase tracking-wide text-[#8C8579]">
-              Montant (FCFA)
-            </label>
-            <input
-              name="delivery_fee"
-              type="number"
-              step="1"
-              defaultValue={getValue("delivery_fee", "1000")}
-              className="mt-1 w-full rounded-md border border-[#D8D3C9] px-3 py-2 text-sm outline-none focus:border-[#006400]"
-            />
           </div>
         </div>
 
