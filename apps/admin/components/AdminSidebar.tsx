@@ -14,6 +14,7 @@ const links = [
   { href: "/promo", label: "Barre promotionnelle" },
   { label: "Commandes", href: "/commandes" },
   { label: "Zones de livraison", href: "/zones-livraison" },
+  { label: "reglages", href: "/reglages" },
   { label: "Messages", href: "/messages" },
   { href: "/avis", label: "Avis clients" },
   { label: "Pages légales", href: "/pages-legales" },
