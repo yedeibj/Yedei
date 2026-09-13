@@ -53,10 +53,18 @@ export default function HeaderNav({ categories }: { categories: NavCategory[] })
                           >
                             {child.label}
                           </Link>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
+                      </li>
+                    ))}
+                  <li>
+              <Link
+                href="/contact"
+                className="text-sm uppercase tracking-widest2 text-ink/80 transition-colors hover:text-ink"
+              >
+                Contact
+              </Link>
+            </li>
+          </ul>
+        </nav>
                 )}
               </li>
             ))}
