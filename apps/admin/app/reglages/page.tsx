@@ -2,38 +2,71 @@ import { createClient as createServerSupabaseClient } from "@yedei/database/serv
 import { revalidatePath } from "next/cache";
 import AdminShell from "@/components/AdminShell";
 
-async function updateDeliveryFee(formData: FormData) {
+async function updateSettings(formData: FormData) {
   "use server";
   const supabase = await createServerSupabaseClient();
-  const value = String(formData.get("delivery_fee") ?? "0").trim();
-  await supabase.from("site_settings").upsert({ key: "delivery_fee", value });
+
+  const entries: [string, string][] = [
+    ["delivery_fee", String(formData.get("delivery_fee") ?? "0").trim()],
+    ["company_phone", String(formData.get("company_phone") ?? "").trim()],
+    ["company_address", String(formData.get("company_address") ?? "").trim()],
+  ];
+
+  for (const [key, value] of entries) {
+    await supabase.from("site_settings").upsert({ key, value });
+  }
+
   revalidatePath("/reglages");
 }
 
 export default async function SettingsPage() {
   const supabase = await createServerSupabaseClient();
-  const { data: setting } = await supabase
-    .from("site_settings")
-    .select("value")
-    .eq("key", "delivery_fee")
-    .single();
+  const { data: settings } = await supabase.from("site_settings").select("key, value");
+
+  const getValue = (key: string, fallback = "") =>
+    settings?.find((s) => s.key === key)?.value ?? fallback;
 
   return (
     <AdminShell>
       <h1 className="font-display text-2xl italic text-[#181715]">Réglages</h1>
-      <p className="mt-1 text-sm text-[#8C8579]">
-        Paramètres généraux du site.
-      </p>
+      <p className="mt-1 text-sm text-[#8C8579]">Paramètres généraux du site.</p>
 
-      <div className="mt-8 max-w-sm rounded-md border border-[#D8D3C9] p-5">
-        <h2 className="text-sm font-medium uppercase tracking-wide text-[#181715]">
-          Frais de livraison
-        </h2>
-        <p className="mt-1 text-xs text-[#8C8579]">
-          Montant fixe ajouté au total de chaque commande, peu importe l'adresse.
-        </p>
-        <form action={updateDeliveryFee} className="mt-4 flex items-end gap-3">
-          <div className="flex-1">
+      <form action={updateSettings} className="mt-8 max-w-sm space-y-6">
+        <div className="rounded-md border border-[#D8D3C9] p-5">
+          <h2 className="text-sm font-medium uppercase tracking-wide text-[#181715]">
+            Coordonnées (page Contact)
+          </h2>
+          <div className="mt-4 space-y-3">
+            <div>
+              <label className="block text-[10px] uppercase tracking-wide text-[#8C8579]">
+                Téléphone
+              </label>
+              <input
+                name="company_phone"
+                defaultValue={getValue("company_phone")}
+                placeholder="+229 00 00 00 00"
+                className="mt-1 w-full rounded-md border border-[#D8D3C9] px-3 py-2 text-sm outline-none focus:border-[#006400]"
+              />
+            </div>
+            <div>
+              <label className="block text-[10px] uppercase tracking-wide text-[#8C8579]">
+                Adresse
+              </label>
+              <input
+                name="company_address"
+                defaultValue={getValue("company_address")}
+                placeholder="Abomey-Calavi, Bénin"
+                className="mt-1 w-full rounded-md border border-[#D8D3C9] px-3 py-2 text-sm outline-none focus:border-[#006400]"
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className="rounded-md border border-[#D8D3C9] p-5">
+          <h2 className="text-sm font-medium uppercase tracking-wide text-[#181715]">
+            Frais de livraison (réglage général, non utilisé si des zones sont configurées)
+          </h2>
+          <div className="mt-4">
             <label className="block text-[10px] uppercase tracking-wide text-[#8C8579]">
               Montant (FCFA)
             </label>
@@ -41,18 +74,19 @@ export default async function SettingsPage() {
               name="delivery_fee"
               type="number"
               step="1"
-              defaultValue={setting?.value ?? "1000"}
-              className="mt-1 w-full rounded-md border border-[#D8D3C9] px-2 py-1.5 text-sm outline-none focus:border-[#006400]"
+              defaultValue={getValue("delivery_fee", "1000")}
+              className="mt-1 w-full rounded-md border border-[#D8D3C9] px-3 py-2 text-sm outline-none focus:border-[#006400]"
             />
           </div>
-          <button
-            type="submit"
-            className="rounded-md bg-[#006400] px-4 py-1.5 text-xs font-medium uppercase tracking-wide text-white hover:opacity-90"
-          >
-            Enregistrer
-          </button>
-        </form>
-      </div>
+        </div>
+
+        <button
+          type="submit"
+          className="rounded-md bg-[#006400] px-4 py-2 text-sm font-medium uppercase tracking-wide text-white hover:opacity-90"
+        >
+          Enregistrer
+        </button>
+      </form>
     </AdminShell>
   );
 }
