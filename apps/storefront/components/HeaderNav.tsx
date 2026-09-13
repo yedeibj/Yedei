@@ -53,9 +53,14 @@ export default function HeaderNav({ categories }: { categories: NavCategory[] })
                           >
                             {child.label}
                           </Link>
-                      </li>
-                    ))}
-                  <li>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </li>
+            ))}
+            <li>
               <Link
                 href="/contact"
                 className="text-sm uppercase tracking-widest2 text-ink/80 transition-colors hover:text-ink"
@@ -63,11 +68,6 @@ export default function HeaderNav({ categories }: { categories: NavCategory[] })
                 Contact
               </Link>
             </li>
-          </ul>
-        </nav>
-                )}
-              </li>
-            ))}
           </ul>
         </nav>
 
@@ -108,7 +108,7 @@ export default function HeaderNav({ categories }: { categories: NavCategory[] })
           aria-label="Navigation mobile"
           className="border-t border-stone-light/60 bg-paper px-6 py-6 md:hidden"
         >
-                   <ul className="flex flex-col gap-1">
+          <ul className="flex flex-col gap-1">
             <li className="border-b border-stone-light/40 py-2">
               <Link
                 href="/"
@@ -157,7 +157,7 @@ export default function HeaderNav({ categories }: { categories: NavCategory[] })
                     </ul>
                   )}
                 </li>
-                            );
+              );
             })}
             <li className="border-b border-stone-light/40 py-2">
               <Link
