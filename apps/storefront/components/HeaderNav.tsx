@@ -157,8 +157,17 @@ export default function HeaderNav({ categories }: { categories: NavCategory[] })
                     </ul>
                   )}
                 </li>
-              );
+                            );
             })}
+            <li className="border-b border-stone-light/40 py-2">
+              <Link
+                href="/contact"
+                onClick={() => setMenuOpen(false)}
+                className="font-display text-xl text-ink"
+              >
+                Contact
+              </Link>
+            </li>
           </ul>
           <div className="mt-6 flex items-center gap-6 border-t border-stone-light/60 pt-6">
             <button type="button" className="flex items-center gap-2 text-sm text-ink/80">
