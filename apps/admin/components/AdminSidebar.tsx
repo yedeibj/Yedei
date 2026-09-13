@@ -20,7 +20,7 @@ const links = [
   { label: "Pages légales", href: "/pages-legales" },
 ];
 
-export default function AdminSidebar() {
+export default function AdminSidebar({ unreadMessages = 0 }: { unreadMessages?: number }) {
   const pathname = usePathname();
 
   return (
@@ -28,6 +28,10 @@ export default function AdminSidebar() {
       {links.map((link) => {
         const isActive =
           link.href === "/" ? pathname === "/" : pathname.startsWith(link.href);
+        const label =
+          link.href === "/messages" && unreadMessages > 0
+            ? `${link.label} (${unreadMessages})`
+            : link.label;
         return (
           <Link
             key={link.href}
@@ -38,7 +42,7 @@ export default function AdminSidebar() {
                 : "text-[#8C8579] hover:bg-[#F6F3EC] hover:text-[#181715]"
             }`}
           >
-            {link.label}
+            {label}
           </Link>
         );
       })}
