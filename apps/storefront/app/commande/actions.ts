@@ -107,7 +107,8 @@ export async function createOrder(input: {
 
     if (!process.env.FEDAPAY_SECRET_KEY) {
       console.error("FEDAPAY_SECRET_KEY est absente des variables d'environnement au runtime.");
-      return { error: "Impossible d'initier le paiement en ligne. Réessaie ou contacte-nous." };
+      // TEMPORAIRE — DEBUG : à retirer une fois le problème identifié.
+      return { error: `[DEBUG] FEDAPAY_SECRET_KEY absente au runtime. env=${FEDAPAY_ENV}` };
     }
 
     const description =
@@ -139,7 +140,10 @@ export async function createOrder(input: {
 
     if (!createRes.ok) {
       console.error("FedaPay create transaction failed:", createRes.status, FEDAPAY_ENV, JSON.stringify(createData));
-      return { error: "Impossible d'initier le paiement en ligne. Réessaie ou contacte-nous." };
+      // TEMPORAIRE — DEBUG : à retirer une fois le problème identifié.
+      return {
+        error: `[DEBUG create ${createRes.status} env=${FEDAPAY_ENV} keyPrefix=${process.env.FEDAPAY_SECRET_KEY?.slice(0, 7)}] ${JSON.stringify(createData)}`,
+      };
     }
 
     const transaction = createData["v1/transaction"] ?? createData.transaction ?? createData;
@@ -147,7 +151,8 @@ export async function createOrder(input: {
 
     if (!transactionId) {
       console.error("FedaPay response missing transaction id:", JSON.stringify(createData));
-      return { error: "Impossible d'initier le paiement en ligne. Réessaie ou contacte-nous." };
+      // TEMPORAIRE — DEBUG : à retirer une fois le problème identifié.
+      return { error: `[DEBUG no-id env=${FEDAPAY_ENV}] ${JSON.stringify(createData)}` };
     }
 
     const tokenRes = await fetch(`${FEDAPAY_BASE_URL}/v1/transactions/${transactionId}/token`, {
@@ -162,14 +167,16 @@ export async function createOrder(input: {
 
     if (!tokenRes.ok) {
       console.error("FedaPay token generation failed:", tokenRes.status, JSON.stringify(tokenData));
-      return { error: "Impossible de générer le lien de paiement. Réessaie ou contacte-nous." };
+      // TEMPORAIRE — DEBUG : à retirer une fois le problème identifié.
+      return { error: `[DEBUG token ${tokenRes.status}] ${JSON.stringify(tokenData)}` };
     }
 
     const paymentUrl = tokenData?.url;
 
     if (!paymentUrl) {
       console.error("FedaPay token response missing url:", JSON.stringify(tokenData));
-      return { error: "Impossible de générer le lien de paiement. Réessaie ou contacte-nous." };
+      // TEMPORAIRE — DEBUG : à retirer une fois le problème identifié.
+      return { error: `[DEBUG no-url] ${JSON.stringify(tokenData)}` };
     }
 
     const serviceClient = createServiceClient();
@@ -185,6 +192,8 @@ export async function createOrder(input: {
     return { orderId, paymentUrl: paymentUrl as string };
   } catch (err) {
     console.error("Erreur inattendue lors de l'appel FedaPay:", err);
-    return { error: "Erreur de connexion au service de paiement. Réessaie ou contacte-nous." };
+    // TEMPORAIRE — DEBUG : à retirer une fois le problème identifié.
+    const message = err instanceof Error ? err.message : String(err);
+    return { error: `[DEBUG catch] ${message}` };
   }
 }
