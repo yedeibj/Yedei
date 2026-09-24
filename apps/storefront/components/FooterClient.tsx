@@ -14,9 +14,11 @@ type FooterCategory = {
 type InfoLink = { label: string; href: string };
 
 const socialLinks = [
-  { label: "Instagram", href: "https://instagram.com" },
-  { label: "Facebook", href: "https://facebook.com" },
-  { label: "TikTok", href: "https://tiktok.com" },
+  { label: "Instagram", href: "https://instagram.com/yedei", Icon: InstagramIcon, color: "#E4405F" },
+  { label: "Facebook", href: "https://facebook.com/yedei", Icon: FacebookIcon, color: "#1877F2" },
+  { label: "TikTok", href: "https://tiktok.com/@yedei", Icon: TikTokIcon, color: "#25F4EE" },
+  { label: "YouTube", href: "https://youtube.com/@yedei", Icon: YouTubeIcon, color: "#FF0000" },
+  { label: "Twitter / X", href: "https://x.com/yedei", Icon: XIcon, color: "#FFFFFF" },
 ];
 
 export default function FooterClient({
@@ -92,7 +94,6 @@ export default function FooterClient({
         {/* Pages légales — une ligne sur desktop, accordéon sur mobile */}
         {infoLinks.length > 0 && (
           <div className="mt-12 border-t border-paper/15 pt-8">
-            {/* Mobile : accordéon */}
             <div className="md:hidden">
               <button
                 type="button"
@@ -118,7 +119,6 @@ export default function FooterClient({
               </ul>
             </div>
 
-            {/* Desktop : une seule ligne */}
             <ul className="hidden flex-wrap items-center gap-x-6 gap-y-2 text-sm text-paper/70 md:flex">
               {infoLinks.map((link) => (
                 <li key={link.href}>
@@ -144,15 +144,21 @@ export default function FooterClient({
             <InstallAppButtons />
           </div>
 
-          <ul className="flex flex-wrap gap-x-6 gap-y-2 text-sm text-paper/70 md:flex-col md:items-end md:gap-2">
-            {socialLinks.map((link) => (
-              <li key={link.href}>
-                <a href={link.href} target="_blank" rel="noreferrer" className="hover:text-paper">
-                  {link.label}
-                </a>
-              </li>
+          <div className="flex items-center gap-4 md:justify-end">
+            {socialLinks.map(({ label, href, Icon, color }) => (
+              
+                key={label}
+                href={href}
+                target="_blank"
+                rel="noreferrer"
+                aria-label={label}
+                title={label}
+                className="flex h-10 w-10 items-center justify-center rounded-full border border-paper/20 transition-transform hover:scale-110"
+              >
+                <Icon color={color} />
+              </a>
             ))}
-          </ul>
+          </div>
         </div>
 
         <p className="mt-12 text-xs text-paper/40">
@@ -160,5 +166,57 @@ export default function FooterClient({
         </p>
       </div>
     </footer>
+  );
+}
+
+function InstagramIcon({ color }: { color: string }) {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2">
+      <rect x="3" y="3" width="18" height="18" rx="5" />
+      <circle cx="12" cy="12" r="4" />
+      <circle cx="17.5" cy="6.5" r="1" fill={color} stroke="none" />
+    </svg>
+  );
+}
+
+function FacebookIcon({ color }: { color: string }) {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill={color}>
+      <path d="M22 12.06C22 6.5 17.52 2 12 2S2 6.5 2 12.06c0 5.02 3.66 9.18 8.44 9.94v-7.03H7.9v-2.91h2.54V9.85c0-2.51 1.49-3.9 3.77-3.9 1.09 0 2.24.2 2.24.2v2.47h-1.26c-1.24 0-1.63.78-1.63 1.57v1.89h2.78l-.44 2.91h-2.34V22c4.78-.76 8.44-4.92 8.44-9.94Z" />
+    </svg>
+  );
+}
+
+function TikTokIcon({ color }: { color: string }) {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+      <path
+        d="M16.6 5.2c.7 1.2 1.9 2.1 3.4 2.3v2.6a6 6 0 0 1-3.4-1.1v6.1a5.3 5.3 0 1 1-4.6-5.3v2.7a2.6 2.6 0 1 0 1.8 2.5V2h2.8c0 .1 0 .2 0 .3.1 1 .5 1.9 1 2.9Z"
+        fill={color}
+      />
+      <path
+        d="M16.6 5.2c.7 1.2 1.9 2.1 3.4 2.3v2.6a6 6 0 0 1-3.4-1.1v6.1a5.3 5.3 0 1 1-4.6-5.3v2.7a2.6 2.6 0 1 0 1.8 2.5V2h2.8c0 .1 0 .2 0 .3.1 1 .5 1.9 1 2.9Z"
+        fill="#FF0050"
+        opacity="0.7"
+      />
+    </svg>
+  );
+}
+
+function YouTubeIcon({ color }: { color: string }) {
+  return (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill={color}>
+      <path d="M23 12s0-3.5-.45-5.15a2.9 2.9 0 0 0-2-2.05C18.9 4.3 12 4.3 12 4.3s-6.9 0-8.55.5a2.9 2.9 0 0 0-2 2.05C1 8.5 1 12 1 12s0 3.5.45 5.15a2.9 2.9 0 0 0 2 2.05c1.65.5 8.55.5 8.55.5s6.9 0 8.55-.5a2.9 2.9 0 0 0 2-2.05C23 15.5 23 12 23 12Z" opacity="0.001" />
+      <path d="M23 12s0-3.5-.45-5.15a2.9 2.9 0 0 0-2-2.05C18.9 4.3 12 4.3 12 4.3s-6.9 0-8.55.5a2.9 2.9 0 0 0-2 2.05C1 8.5 1 12 1 12s0 3.5.45 5.15a2.9 2.9 0 0 0 2 2.05c1.65.5 8.55.5 8.55.5s6.9 0 8.55-.5a2.9 2.9 0 0 0 2-2.05C23 15.5 23 12 23 12Z" fillOpacity="0" stroke={color} strokeWidth="0" />
+      <path d="M9.8 15.3V8.7L15.6 12l-5.8 3.3Z" fill="#181715" />
+    </svg>
+  );
+}
+
+function XIcon({ color }: { color: string }) {
+  return (
+    <svg width="16" height="16" viewBox="0 0 24 24" fill={color}>
+      <path d="M18.9 2H22l-7.6 8.7L23 22h-6.9l-5.4-6.6L4.6 22H1.5l8.2-9.3L1 2h7.1l4.9 6.1L18.9 2Zm-1.2 18h1.9L7.4 4H5.3l12.4 16Z" />
+    </svg>
   );
 }
