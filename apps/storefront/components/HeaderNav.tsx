@@ -1,8 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import CartIndicator from "./CartIndicator";
+import { createClient as createBrowserSupabaseClient } from "@yedei/database/client";
 
 type NavCategory = {
   id: string;
@@ -11,9 +13,78 @@ type NavCategory = {
   children: { id: string; label: string; slug: string }[];
 };
 
+type SearchResult = {
+  id: string;
+  slug: string;
+  name: string;
+  price: number;
+  imageUrl?: string;
+};
+
 export default function HeaderNav({ categories }: { categories: NavCategory[] }) {
+  const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
   const [openMobileSubmenu, setOpenMobileSubmenu] = useState<string | null>(null);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [query, setQuery] = useState("");
+  const [results, setResults] = useState<SearchResult[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (searchOpen) {
+      setTimeout(() => inputRef.current?.focus(), 50);
+    } else {
+      setQuery("");
+      setResults([]);
+    }
+  }, [searchOpen]);
+
+  useEffect(() => {
+    if (!query.trim()) {
+      setResults([]);
+      return;
+    }
+
+    const timeout = setTimeout(async () => {
+      setIsSearching(true);
+      const supabase = createBrowserSupabaseClient();
+      const { data } = await supabase
+        .from("products")
+        .select("id, slug, name, price, product_images(url, sort_order)")
+        .eq("is_active", true)
+        .ilike("name", `%${query.trim()}%`)
+        .limit(6);
+
+      const mapped = (data ?? []).map((p: any) => {
+        const sortedImages = [...(p.product_images ?? [])].sort(
+          (a: any, b: any) => a.sort_order - b.sort_order
+        );
+        return {
+          id: p.id,
+          slug: p.slug,
+          name: p.name,
+          price: p.price,
+          imageUrl: sortedImages[0]?.url,
+        };
+      });
+
+      setResults(mapped);
+      setIsSearching(false);
+    }, 300);
+
+    return () => clearTimeout(timeout);
+  }, [query]);
+
+  function goToFullResults() {
+    if (!query.trim()) return;
+    setSearchOpen(false);
+    router.push(`/recherche?q=${encodeURIComponent(query.trim())}`);
+  }
+
+  function formatFcfa(value: number) {
+    return value.toLocaleString("fr-FR") + " FCFA";
+  }
 
   return (
     <header className="sticky top-0 z-50 border-b border-stone-light/60 bg-paper/90 backdrop-blur">
@@ -76,6 +147,7 @@ export default function HeaderNav({ categories }: { categories: NavCategory[] })
           <button
             type="button"
             aria-label="Rechercher"
+            onClick={() => setSearchOpen(true)}
             className="hidden text-ink/80 transition-colors hover:text-ink md:block"
           >
             <SearchIcon />
@@ -170,7 +242,14 @@ export default function HeaderNav({ categories }: { categories: NavCategory[] })
             </li>
           </ul>
           <div className="mt-6 flex items-center gap-6 border-t border-stone-light/60 pt-6">
-            <button type="button" className="flex items-center gap-2 text-sm text-ink/80">
+            <button
+              type="button"
+              onClick={() => {
+                setMenuOpen(false);
+                setSearchOpen(true);
+              }}
+              className="flex items-center gap-2 text-sm text-ink/80"
+            >
               <SearchIcon /> Rechercher
             </button>
             <button type="button" className="flex items-center gap-2 text-sm text-ink/80">
@@ -178,6 +257,76 @@ export default function HeaderNav({ categories }: { categories: NavCategory[] })
             </button>
           </div>
         </nav>
+      )}
+
+      {/* Panneau de recherche */}
+      {searchOpen && (
+        <div className="fixed inset-0 z-[80]">
+          <div
+            onClick={() => setSearchOpen(false)}
+            className="absolute inset-0 bg-black/40"
+            aria-hidden="true"
+          />
+          <div className="relative mx-auto mt-0 max-w-2xl bg-paper px-6 py-6 shadow-xl sm:mt-16 sm:rounded-2xl sm:px-8">
+            <div className="flex items-center gap-3">
+              <SearchIcon />
+              <input
+                ref={inputRef}
+                type="text"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && goToFullResults()}
+                placeholder="Rechercher un produit..."
+                className="flex-1 border-none bg-transparent text-lg text-ink outline-none placeholder:text-ink/40"
+              />
+              <button
+                type="button"
+                onClick={() => setSearchOpen(false)}
+                aria-label="Fermer la recherche"
+                className="text-2xl leading-none text-ink/50 hover:text-ink"
+              >
+                ×
+              </button>
+            </div>
+
+            <div className="mt-4 max-h-[60vh] overflow-y-auto border-t border-stone-light/60 pt-4">
+              {isSearching && <p className="text-sm text-ink/50">Recherche...</p>}
+
+              {!isSearching && query.trim() && results.length === 0 && (
+                <p className="text-sm text-ink/50">Aucun résultat pour "{query}".</p>
+              )}
+
+              {results.map((product) => (
+                <Link
+                  key={product.id}
+                  href={`/produits/${product.slug}`}
+                  onClick={() => setSearchOpen(false)}
+                  className="flex items-center gap-3 rounded-md px-2 py-2 hover:bg-sand"
+                >
+                  <div className="h-12 w-12 flex-shrink-0 overflow-hidden rounded bg-white">
+                    {product.imageUrl && (
+                      <img src={product.imageUrl} alt="" className="h-full w-full object-contain" />
+                    )}
+                  </div>
+                  <div className="flex-1">
+                    <p className="text-sm text-ink">{product.name}</p>
+                    <p className="text-xs text-ink/50">{formatFcfa(product.price)}</p>
+                  </div>
+                </Link>
+              ))}
+
+              {query.trim() && results.length > 0 && (
+                <button
+                  type="button"
+                  onClick={goToFullResults}
+                  className="mt-2 w-full rounded-md border border-stone-light/60 py-2 text-center text-xs uppercase tracking-wide text-ink/70 hover:border-ink hover:text-ink"
+                >
+                  Voir tous les résultats pour "{query}"
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
       )}
     </header>
   );
