@@ -21,6 +21,8 @@ const socialLinks = [
   { label: "Twitter / X", href: "https://x.com/yedei", Icon: XIcon, color: "#FFFFFF" },
 ];
 
+const socialIconClass = "flex h-10 w-10 items-center justify-center rounded-full border border-paper/20 transition-transform hover:scale-110";
+
 export default function FooterClient({
   categories,
   infoLinks,
@@ -145,19 +147,14 @@ export default function FooterClient({
           </div>
 
           <div className="flex items-center gap-4 md:justify-end">
-            {socialLinks.map(({ label, href, Icon, color }) => (
-              
-                key={label}
-                href={href}
-                target="_blank"
-                rel="noreferrer"
-                aria-label={label}
-                title={label}
-                className="flex h-10 w-10 items-center justify-center rounded-full border border-paper/20 transition-transform hover:scale-110"
-              >
-                <Icon color={color} />
-              </a>
-            ))}
+            {socialLinks.map((social) => {
+              const Icon = social.Icon;
+              return (
+                <a key={social.label} href={social.href} target="_blank" rel="noreferrer" aria-label={social.label} title={social.label} className={socialIconClass}>
+                  <Icon color={social.color} />
+                </a>
+              );
+            })}
           </div>
         </div>
 
@@ -206,8 +203,7 @@ function TikTokIcon({ color }: { color: string }) {
 function YouTubeIcon({ color }: { color: string }) {
   return (
     <svg width="20" height="20" viewBox="0 0 24 24" fill={color}>
-      <path d="M23 12s0-3.5-.45-5.15a2.9 2.9 0 0 0-2-2.05C18.9 4.3 12 4.3 12 4.3s-6.9 0-8.55.5a2.9 2.9 0 0 0-2 2.05C1 8.5 1 12 1 12s0 3.5.45 5.15a2.9 2.9 0 0 0 2 2.05c1.65.5 8.55.5 8.55.5s6.9 0 8.55-.5a2.9 2.9 0 0 0 2-2.05C23 15.5 23 12 23 12Z" opacity="0.001" />
-      <path d="M23 12s0-3.5-.45-5.15a2.9 2.9 0 0 0-2-2.05C18.9 4.3 12 4.3 12 4.3s-6.9 0-8.55.5a2.9 2.9 0 0 0-2 2.05C1 8.5 1 12 1 12s0 3.5.45 5.15a2.9 2.9 0 0 0 2 2.05c1.65.5 8.55.5 8.55.5s6.9 0 8.55-.5a2.9 2.9 0 0 0 2-2.05C23 15.5 23 12 23 12Z" fillOpacity="0" stroke={color} strokeWidth="0" />
+      <path d="M23 12s0-3.5-.45-5.15a2.9 2.9 0 0 0-2-2.05C18.9 4.3 12 4.3 12 4.3s-6.9 0-8.55.5a2.9 2.9 0 0 0-2 2.05C1 8.5 1 12 1 12s0 3.5.45 5.15a2.9 2.9 0 0 0 2 2.05c1.65.5 8.55.5 8.55.5s6.9 0 8.55-.5a2.9 2.9 0 0 0 2-2.05C23 15.5 23 12 23 12Z" />
       <path d="M9.8 15.3V8.7L15.6 12l-5.8 3.3Z" fill="#181715" />
     </svg>
   );
