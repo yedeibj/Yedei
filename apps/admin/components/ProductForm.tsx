@@ -112,23 +112,34 @@ export default function ProductForm({
       return;
     }
 
-                  await supabase.from("product_variants").delete().eq("product_id", productId);
+    await supabase.from("product_variants").delete().eq("product_id", productId);
     if (variants.length > 0) {
       await supabase.from("product_variants").insert(
         variants
           .filter((v) => v.size.trim())
-          .map((v) => ({
-            product_id: productId,
-            size: v.size.trim(),
-            sku: v.sku.trim() || null,
-            price: v.price ? Number(v.price) : null,
-            stock: v.stock ? Number(v.stock) : 0,
-            image_url: v.imageUrl || null,
-            color: v.color?.trim() || null,
-            color_hex: v.colorHex || null,
-          }))
+          .map((v) => {
+            const effectivePrice = v.price ? Number(v.price) : Number(price) || 0;
+            const discount = v.discountPercent ? Number(v.discountPercent) : 0;
+            const hasDiscount = discount > 0 && discount < 100 && effectivePrice > 0;
+            const variantCompareAtPrice = hasDiscount
+              ? Math.round(effectivePrice / (1 - discount / 100) / 100) * 100
+              : null;
+
+            return {
+              product_id: productId,
+              size: v.size.trim(),
+              sku: v.sku.trim() || null,
+              price: v.price ? Number(v.price) : null,
+              stock: v.stock ? Number(v.stock) : 0,
+              image_url: v.imageUrl || null,
+              color: v.color?.trim() || null,
+              color_hex: v.colorHex || null,
+              compare_at_price: variantCompareAtPrice,
+            };
+          })
       );
     }
+
     await supabase.from("product_images").delete().eq("product_id", productId);
     if (images.length > 0) {
       await supabase.from("product_images").insert(
@@ -140,7 +151,7 @@ export default function ProductForm({
       );
     }
 
-        setIsSaving(false);
+    setIsSaving(false);
     setSavedSlug(slug);
     router.refresh();
     if (isEditing) {
@@ -289,7 +300,7 @@ export default function ProductForm({
           </div>
         </div>
 
-        <VariantsEditor variants={variants} onChange={setVariants} />
+        <VariantsEditor variants={variants} basePrice={price} onChange={setVariants} />
 
         <ImageUploader productId={productId} images={images} onChange={setImages} />
 
