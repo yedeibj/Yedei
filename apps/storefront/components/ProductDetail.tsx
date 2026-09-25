@@ -19,7 +19,7 @@ export default function ProductDetail({
   name,
   description,
   basePrice,
-  compareAtPrice,
+  discountPercent,
   images,
   variants,
 }: {
@@ -28,7 +28,7 @@ export default function ProductDetail({
   name: string;
   description: string | null;
   basePrice: number;
-  compareAtPrice: number | null;
+  discountPercent: number | null;
   images: { url: string }[];
   variants: Variant[];
 }) {
@@ -46,7 +46,7 @@ export default function ProductDetail({
           slug={slug}
           name={name}
           basePrice={basePrice}
-          compareAtPrice={compareAtPrice}
+          discountPercent={discountPercent}
           imageUrl={variantImageUrl ?? images[0]?.url}
           variants={variants}
           onVariantChange={setVariantImageUrl}
