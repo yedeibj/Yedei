@@ -12,7 +12,6 @@ export type VariantRow = {
   imageUrl?: string;
   color?: string;
   colorHex?: string;
-  discountPercent?: string;
 };
 
 const COLOR_PRESETS: { name: string; hex: string }[] = [
@@ -32,18 +31,6 @@ const COLOR_PRESETS: { name: string; hex: string }[] = [
   { name: "Doré", hex: "#C9A227" },
   { name: "Argenté", hex: "#B0B0B0" },
 ];
-
-function computeCompareAtPrice(sellingPrice: number, discountPercent: number): number | null {
-  if (!sellingPrice || !discountPercent || discountPercent <= 0 || discountPercent >= 100) {
-    return null;
-  }
-  const raw = sellingPrice / (1 - discountPercent / 100);
-  return Math.round(raw / 100) * 100;
-}
-
-function formatFcfa(value: number) {
-  return value.toLocaleString("fr-FR") + " FCFA";
-}
 
 function VariantImageCell({
   value,
@@ -174,11 +161,9 @@ function ColorSelectCell({
 
 export default function VariantsEditor({
   variants,
-  basePrice,
   onChange,
 }: {
   variants: VariantRow[];
-  basePrice: string;
   onChange: (variants: VariantRow[]) => void;
 }) {
   const [bulkSizes, setBulkSizes] = useState("");
@@ -186,17 +171,7 @@ export default function VariantsEditor({
   function addRow() {
     onChange([
       ...variants,
-      {
-        key: crypto.randomUUID(),
-        size: "",
-        sku: "",
-        price: "",
-        stock: "0",
-        imageUrl: undefined,
-        color: "",
-        colorHex: "#8C8579",
-        discountPercent: "",
-      },
+      { key: crypto.randomUUID(), size: "", sku: "", price: "", stock: "0", imageUrl: undefined, color: "", colorHex: "#8C8579" },
     ]);
   }
 
@@ -216,7 +191,6 @@ export default function VariantsEditor({
       imageUrl: undefined,
       color: "",
       colorHex: "#8C8579",
-      discountPercent: "",
     }));
     onChange([...variants, ...newRows]);
     setBulkSizes("");
@@ -257,8 +231,9 @@ export default function VariantsEditor({
         </button>
       </div>
       <p className="mt-1 text-xs text-[#8C8579]">
-        Le champ "Réduction %" calcule automatiquement le prix barré de chaque variante, arrondi
-        à la centaine. Laisse-le vide si cette variante n'est pas en promotion.
+        Pour un produit à plusieurs couleurs, choisis la même couleur dans la liste sur toutes les
+        lignes concernées, et ajoute une photo par couleur. La réduction en pourcentage se règle
+        plus haut, au niveau du produit — elle s'applique automatiquement à toutes les variantes.
       </p>
 
       {variants.length > 0 && (
@@ -271,97 +246,74 @@ export default function VariantsEditor({
                 <th className="px-3 py-2">Taille</th>
                 <th className="px-3 py-2">Âge / Code</th>
                 <th className="px-3 py-2">Prix (si différent)</th>
-                <th className="px-3 py-2">Réduction %</th>
-                <th className="px-3 py-2">Prix barré</th>
                 <th className="px-3 py-2">Stock</th>
                 <th className="px-3 py-2"></th>
               </tr>
             </thead>
             <tbody>
-              {variants.map((v) => {
-                const effectivePrice = v.price ? Number(v.price) : Number(basePrice) || 0;
-                const discount = v.discountPercent ? Number(v.discountPercent) : 0;
-                const compareAtPrice = computeCompareAtPrice(effectivePrice, discount);
-
-                return (
-                  <tr key={v.key} className="border-b border-[#F0EDE5] last:border-0">
-                    <td className="px-3 py-2">
-                      <VariantImageCell
-                        value={v.imageUrl}
-                        onChange={(url) => updateRow(v.key, "imageUrl", url)}
-                      />
-                    </td>
-                    <td className="px-3 py-2">
-                      <ColorSelectCell
-                        color={v.color ?? ""}
-                        colorHex={v.colorHex ?? "#8C8579"}
-                        onSelectPreset={(name, hex) => updateColor(v.key, name, hex)}
-                        onChangeCustomName={(name) => updateRow(v.key, "color", name)}
-                        onChangeCustomHex={(hex) => updateRow(v.key, "colorHex", hex)}
-                      />
-                    </td>
-                    <td className="px-3 py-2">
-                      <input
-                        type="text"
-                        value={v.size}
-                        onChange={(e) => updateRow(v.key, "size", e.target.value)}
-                        className="w-16 rounded border border-[#D8D3C9] px-2 py-1"
-                      />
-                    </td>
-                    <td className="px-3 py-2">
-                      <input
-                        type="text"
-                        value={v.sku}
-                        onChange={(e) => updateRow(v.key, "sku", e.target.value)}
-                        placeholder="Ex: 6-7 ans"
-                        className="w-28 rounded border border-[#D8D3C9] px-2 py-1"
-                      />
-                    </td>
-                    <td className="px-3 py-2">
-                      <input
-                        type="number"
-                        step="0.01"
-                        value={v.price}
-                        onChange={(e) => updateRow(v.key, "price", e.target.value)}
-                        placeholder="Prix de base"
-                        className="w-24 rounded border border-[#D8D3C9] px-2 py-1"
-                      />
-                    </td>
-                    <td className="px-3 py-2">
-                      <input
-                        type="number"
-                        step="1"
-                        min="0"
-                        max="99"
-                        value={v.discountPercent ?? ""}
-                        onChange={(e) => updateRow(v.key, "discountPercent", e.target.value)}
-                        placeholder="Ex: 10"
-                        className="w-16 rounded border border-[#D8D3C9] px-2 py-1"
-                      />
-                    </td>
-                    <td className="px-3 py-2 whitespace-nowrap text-[#8C8579]">
-                      {compareAtPrice ? formatFcfa(compareAtPrice) : "—"}
-                    </td>
-                    <td className="px-3 py-2">
-                      <input
-                        type="number"
-                        value={v.stock}
-                        onChange={(e) => updateRow(v.key, "stock", e.target.value)}
-                        className="w-16 rounded border border-[#D8D3C9] px-2 py-1"
-                      />
-                    </td>
-                    <td className="px-3 py-2">
-                      <button
-                        type="button"
-                        onClick={() => removeRow(v.key)}
-                        className="text-[#DC143C] hover:underline"
-                      >
-                        Retirer
-                      </button>
-                    </td>
-                  </tr>
-                );
-              })}
+              {variants.map((v) => (
+                <tr key={v.key} className="border-b border-[#F0EDE5] last:border-0">
+                  <td className="px-3 py-2">
+                    <VariantImageCell
+                      value={v.imageUrl}
+                      onChange={(url) => updateRow(v.key, "imageUrl", url)}
+                    />
+                  </td>
+                  <td className="px-3 py-2">
+                    <ColorSelectCell
+                      color={v.color ?? ""}
+                      colorHex={v.colorHex ?? "#8C8579"}
+                      onSelectPreset={(name, hex) => updateColor(v.key, name, hex)}
+                      onChangeCustomName={(name) => updateRow(v.key, "color", name)}
+                      onChangeCustomHex={(hex) => updateRow(v.key, "colorHex", hex)}
+                    />
+                  </td>
+                  <td className="px-3 py-2">
+                    <input
+                      type="text"
+                      value={v.size}
+                      onChange={(e) => updateRow(v.key, "size", e.target.value)}
+                      className="w-16 rounded border border-[#D8D3C9] px-2 py-1"
+                    />
+                  </td>
+                  <td className="px-3 py-2">
+                    <input
+                      type="text"
+                      value={v.sku}
+                      onChange={(e) => updateRow(v.key, "sku", e.target.value)}
+                      placeholder="Ex: 6-7 ans"
+                      className="w-28 rounded border border-[#D8D3C9] px-2 py-1"
+                    />
+                  </td>
+                  <td className="px-3 py-2">
+                    <input
+                      type="number"
+                      step="0.01"
+                      value={v.price}
+                      onChange={(e) => updateRow(v.key, "price", e.target.value)}
+                      placeholder="Prix de base"
+                      className="w-24 rounded border border-[#D8D3C9] px-2 py-1"
+                    />
+                  </td>
+                  <td className="px-3 py-2">
+                    <input
+                      type="number"
+                      value={v.stock}
+                      onChange={(e) => updateRow(v.key, "stock", e.target.value)}
+                      className="w-16 rounded border border-[#D8D3C9] px-2 py-1"
+                    />
+                  </td>
+                  <td className="px-3 py-2">
+                    <button
+                      type="button"
+                      onClick={() => removeRow(v.key)}
+                      className="text-[#DC143C] hover:underline"
+                    >
+                      Retirer
+                    </button>
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>
