@@ -152,13 +152,7 @@ export default function HeaderNav({ categories }: { categories: NavCategory[] })
           >
             <SearchIcon />
           </button>
-          <button
-            type="button"
-            aria-label="Mon compte"
-            className="hidden text-ink/80 transition-colors hover:text-ink md:block"
-          >
-            <UserIcon />
-          </button>
+          
           <div className="text-ink/80 transition-colors hover:text-ink">
             <CartIndicator />
           </div>
@@ -252,9 +246,6 @@ export default function HeaderNav({ categories }: { categories: NavCategory[] })
             >
               <SearchIcon /> Rechercher
             </button>
-            <button type="button" className="flex items-center gap-2 text-sm text-ink/80">
-              <UserIcon /> Compte
-            </button>
           </div>
         </nav>
       )}
@@ -337,15 +328,6 @@ function SearchIcon() {
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
       <circle cx="11" cy="11" r="7" />
       <path d="M21 21l-4.3-4.3" strokeLinecap="round" />
-    </svg>
-  );
-}
-
-function UserIcon() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-      <circle cx="12" cy="8" r="4" />
-      <path d="M4 20c1.5-4 6-6 8-6s6.5 2 8 6" strokeLinecap="round" />
     </svg>
   );
 }
