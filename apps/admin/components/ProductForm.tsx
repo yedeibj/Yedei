@@ -13,7 +13,7 @@ type ExistingProduct = {
   name: string;
   description: string | null;
   price: number;
-  compare_at_price: number | null;
+  discount_percent: number | null;
   category_id: string | null;
   is_new: boolean;
   is_best_seller: boolean;
@@ -37,6 +37,11 @@ function buildCategoryGroups(categories: Category[]) {
   }));
 }
 
+function computeCompareAtPrice(price: number, discountPercent: number): number | null {
+  if (!price || !discountPercent || discountPercent <= 0 || discountPercent >= 100) return null;
+  return Math.round(price / (1 - discountPercent / 100) / 100) * 100;
+}
+
 export default function ProductForm({
   categories,
   product,
@@ -56,8 +61,8 @@ export default function ProductForm({
   const [name, setName] = useState(product?.name ?? "");
   const [description, setDescription] = useState(product?.description ?? "");
   const [price, setPrice] = useState(product ? String(product.price) : "");
-  const [compareAtPrice, setCompareAtPrice] = useState(
-    product?.compare_at_price ? String(product.compare_at_price) : ""
+  const [discountPercent, setDiscountPercent] = useState(
+    product?.discount_percent ? String(product.discount_percent) : ""
   );
   const [categoryId, setCategoryId] = useState(product?.category_id ?? categories[0]?.id ?? "");
   const [isNew, setIsNew] = useState(product?.is_new ?? true);
@@ -73,6 +78,8 @@ export default function ProductForm({
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "";
   const productUrl = savedSlug ? siteUrl + "/produits/" + savedSlug : "";
   const categoryGroups = buildCategoryGroups(categories);
+
+  const previewCompareAtPrice = computeCompareAtPrice(Number(price) || 0, Number(discountPercent) || 0);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -93,7 +100,7 @@ export default function ProductForm({
       slug,
       description,
       price: Number(price),
-      compare_at_price: compareAtPrice ? Number(compareAtPrice) : null,
+      discount_percent: discountPercent ? Number(discountPercent) : null,
       category_id: categoryId || null,
       is_new: isNew,
       is_best_seller: isBestSeller,
@@ -117,26 +124,16 @@ export default function ProductForm({
       await supabase.from("product_variants").insert(
         variants
           .filter((v) => v.size.trim())
-          .map((v) => {
-            const effectivePrice = v.price ? Number(v.price) : Number(price) || 0;
-            const discount = v.discountPercent ? Number(v.discountPercent) : 0;
-            const hasDiscount = discount > 0 && discount < 100 && effectivePrice > 0;
-            const variantCompareAtPrice = hasDiscount
-              ? Math.round(effectivePrice / (1 - discount / 100) / 100) * 100
-              : null;
-
-            return {
-              product_id: productId,
-              size: v.size.trim(),
-              sku: v.sku.trim() || null,
-              price: v.price ? Number(v.price) : null,
-              stock: v.stock ? Number(v.stock) : 0,
-              image_url: v.imageUrl || null,
-              color: v.color?.trim() || null,
-              color_hex: v.colorHex || null,
-              compare_at_price: variantCompareAtPrice,
-            };
-          })
+          .map((v) => ({
+            product_id: productId,
+            size: v.size.trim(),
+            sku: v.sku.trim() || null,
+            price: v.price ? Number(v.price) : null,
+            stock: v.stock ? Number(v.stock) : 0,
+            image_url: v.imageUrl || null,
+            color: v.color?.trim() || null,
+            color_hex: v.colorHex || null,
+          }))
       );
     }
 
@@ -235,15 +232,23 @@ export default function ProductForm({
             </div>
             <div className="flex-1">
               <label className="block text-xs font-medium uppercase tracking-wide text-[#181715]">
-                Prix barre (promo, optionnel)
+                Réduction (%, optionnel)
               </label>
               <input
                 type="number"
-                step="0.01"
-                value={compareAtPrice}
-                onChange={(e) => setCompareAtPrice(e.target.value)}
+                step="1"
+                min="0"
+                max="99"
+                value={discountPercent}
+                onChange={(e) => setDiscountPercent(e.target.value)}
+                placeholder="Ex: 10"
                 className="mt-1 w-full rounded-md border border-[#D8D3C9] px-3 py-2 text-sm outline-none focus:border-[#006400]"
               />
+              {previewCompareAtPrice && (
+                <p className="mt-1 text-[10px] text-[#8C8579]">
+                  Prix barré affiché : {previewCompareAtPrice.toLocaleString("fr-FR")} FCFA
+                </p>
+              )}
             </div>
             <div className="flex-1">
               <label className="block text-xs font-medium uppercase tracking-wide text-[#181715]">
@@ -300,7 +305,7 @@ export default function ProductForm({
           </div>
         </div>
 
-        <VariantsEditor variants={variants} basePrice={price} onChange={setVariants} />
+        <VariantsEditor variants={variants} onChange={setVariants} />
 
         <ImageUploader productId={productId} images={images} onChange={setImages} />
 
