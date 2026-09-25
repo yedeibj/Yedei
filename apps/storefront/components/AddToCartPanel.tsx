@@ -18,12 +18,17 @@ function formatFcfa(value: number) {
   return value.toLocaleString("fr-FR") + " FCFA";
 }
 
+function computeCompareAtPrice(price: number, discountPercent: number | null): number | null {
+  if (!price || !discountPercent || discountPercent <= 0 || discountPercent >= 100) return null;
+  return Math.round(price / (1 - discountPercent / 100) / 100) * 100;
+}
+
 export default function AddToCartPanel({
   productId,
   slug,
   name,
   basePrice,
-  compareAtPrice,
+  discountPercent,
   imageUrl,
   variants,
   onVariantChange,
@@ -32,7 +37,7 @@ export default function AddToCartPanel({
   slug: string;
   name: string;
   basePrice: number;
-  compareAtPrice?: number | null;
+  discountPercent: number | null;
   imageUrl?: string;
   variants: Variant[];
   onVariantChange?: (imageUrl: string | null) => void;
@@ -76,6 +81,9 @@ export default function AddToCartPanel({
   }, [variants, visibleVariants, hasColors, basePrice]);
 
   const displayedPrice = selectedVariant ? effectivePrice(selectedVariant) : null;
+  const displayedCompareAtPrice = displayedPrice
+    ? computeCompareAtPrice(displayedPrice, discountPercent)
+    : null;
 
   function handleSelectColor(colorName: string, hex: string | null) {
     setSelectedColor(colorName);
@@ -120,16 +128,20 @@ export default function AddToCartPanel({
     <div>
       <div className="mt-3 flex items-center gap-3">
         {displayedPrice !== null ? (
-          <p className="text-xl text-[#181715]">{formatFcfa(displayedPrice)}</p>
+          <>
+            <p className="text-xl text-[#181715]">{formatFcfa(displayedPrice)}</p>
+            {displayedCompareAtPrice && (
+              <p className="text-sm text-[#8C8579] line-through">
+                {formatFcfa(displayedCompareAtPrice)}
+              </p>
+            )}
+          </>
         ) : priceRange.min === priceRange.max ? (
           <p className="text-xl text-[#181715]">{formatFcfa(priceRange.min)}</p>
         ) : (
           <p className="text-xl text-[#181715]">
             {formatFcfa(priceRange.min)} – {formatFcfa(priceRange.max)}
           </p>
-        )}
-        {compareAtPrice && (
-          <p className="text-sm text-[#8C8579] line-through">{formatFcfa(compareAtPrice)}</p>
         )}
       </div>
 
