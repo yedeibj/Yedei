@@ -24,7 +24,7 @@ export default async function EditProductPage({
       supabase.from("categories").select("id, name, parent_id").order("sort_order"),
       supabase
         .from("product_variants")
-        .select("size, sku, price, stock, image_url, color, color_hex")
+        .select("size, sku, price, stock, image_url, color, color_hex, compare_at_price")
         .eq("product_id", id),
       supabase
         .from("product_images")
@@ -35,16 +35,26 @@ export default async function EditProductPage({
 
   if (!product) notFound();
 
-  const initialVariants = (variants ?? []).map((v) => ({
-    key: crypto.randomUUID(),
-    size: v.size ?? "",
-    sku: v.sku ?? "",
-    price: v.price ? String(v.price) : "",
-    stock: v.stock ? String(v.stock) : "0",
-    imageUrl: v.image_url ?? undefined,
-    color: v.color ?? "",
-    colorHex: v.color_hex ?? "#8C8579",
-  }));
+  const initialVariants = (variants ?? []).map((v) => {
+    const variantPrice = v.price ? Number(v.price) : Number(product.price) || 0;
+    const variantCompareAtPrice = v.compare_at_price ? Number(v.compare_at_price) : null;
+    const discountPercent =
+      variantCompareAtPrice && variantPrice > 0 && variantCompareAtPrice > variantPrice
+        ? Math.round((1 - variantPrice / variantCompareAtPrice) * 100)
+        : "";
+
+    return {
+      key: crypto.randomUUID(),
+      size: v.size ?? "",
+      sku: v.sku ?? "",
+      price: v.price ? String(v.price) : "",
+      stock: v.stock ? String(v.stock) : "0",
+      imageUrl: v.image_url ?? undefined,
+      color: v.color ?? "",
+      colorHex: v.color_hex ?? "#8C8579",
+      discountPercent: discountPercent ? String(discountPercent) : "",
+    };
+  });
 
   const initialImages = (images ?? []).map((img) => ({
     path: img.url.split("/products/").pop() ?? "",
