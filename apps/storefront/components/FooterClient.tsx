@@ -14,10 +14,10 @@ type FooterCategory = {
 type InfoLink = { label: string; href: string };
 
 const socialLinks = [
-  { label: "Instagram", href: "https://instagram.com/yedei", Icon: InstagramIcon, color: "#E4405F" },
-  { label: "Facebook", href: "https://facebook.com/yedei", Icon: FacebookIcon, color: "#1877F2" },
-  { label: "TikTok", href: "https://tiktok.com/@yedei", Icon: TikTokIcon, color: "#25F4EE" },
-  { label: "YouTube", href: "https://youtube.com/@yedei", Icon: YouTubeIcon, color: "#FF0000" },
+  { label: "Instagram", href: "https://www.instagram.com/yedeivetema?stkn=NWJ2bWMzMWVpMzhr&utm_source=qr", Icon: InstagramIcon, color: "#E4405F" },
+  { label: "Facebook", href: "https://www.facebook.com/share/14rrGCbe7wv/?mibextid=wwXIfr", Icon: FacebookIcon, color: "#1877F2" },
+  { label: "TikTok", href: "https://www.tiktok.com/@yedei5?_r=1&_t=ZS-9A00duUnmbv", Icon: TikTokIcon, color: "#25F4EE" },
+  { label: "YouTube", href: "https://www.youtube.com/@YEDEI-m3u", Icon: YouTubeIcon, color: "#FF0000" },
   { label: "Twitter / X", href: "https://x.com/yedei", Icon: XIcon, color: "#FFFFFF" },
 ];
 
