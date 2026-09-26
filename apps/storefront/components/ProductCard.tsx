@@ -18,7 +18,7 @@ export default function ProductCard({
   isBestSeller,
 }: ProductCardProps) {
   return (
-    <Link href={`/produits/${slug}`} className="group w-[220px] flex-shrink-0 snap-start sm:w-[260px]">
+    <Link href={`/produits/${slug}`} className="group block w-full">
       <div className="relative aspect-[3/4] overflow-hidden rounded-md bg-white">
         {imageUrl ? (
           <img
@@ -39,7 +39,7 @@ export default function ProductCard({
         )}
       </div>
 
-      <p className="mt-3 font-sans text-sm text-[#181715]">{name}</p>
+      <p className="mt-3 line-clamp-2 font-sans text-sm text-[#181715]">{name}</p>
       <p className="text-sm text-[#8C8579]">{price.toLocaleString("fr-FR")} FCFA</p>
     </Link>
   );
