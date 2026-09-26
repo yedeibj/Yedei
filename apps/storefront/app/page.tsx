@@ -43,12 +43,12 @@ export default async function HomePage() {
         subtitle="Robes, ensembles et essentiels du quotidien"
       />
       <CategoryProducts
-        categorySlug="enfant-fille"
+        categorySlug="fille"
         title="Collection Fille"
         subtitle="Tenues élégantes pour les petites filles"
       />
       <CategoryProducts
-        categorySlug="enfant-garcon"
+        categorySlug="garcon"
         title="Collection Garçon"
         subtitle="Tenues robustes et stylées pour les garçons"
       />
