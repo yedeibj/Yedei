@@ -5,10 +5,12 @@ export default async function CategoryProducts({
   categorySlug,
   title,
   subtitle,
+  limit = 5,
 }: {
   categorySlug: string;
   title: string;
   subtitle?: string;
+  limit?: number;
 }) {
   const supabase = await createServerSupabaseClient();
 
@@ -33,7 +35,7 @@ export default async function CategoryProducts({
     .in("category_id", categoryIds)
     .eq("is_active", true)
     .order("created_at", { ascending: false })
-    .limit(12);
+    .limit(limit);
 
   const products = (data ?? []).map((p: any) => ({
     ...p,
