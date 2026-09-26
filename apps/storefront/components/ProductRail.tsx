@@ -40,15 +40,16 @@ export default function ProductRail({ title, subtitle, seeAllHref, products }: P
 
       <div className="flex gap-4 overflow-x-auto scroll-smooth pb-2 snap-x snap-mandatory [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
         {products.map((product) => (
-          <ProductCard
-            key={product.id}
-            slug={product.slug}
-            name={product.name}
-            price={product.price}
-            imageUrl={product.product_images?.[0]?.url}
-            isNew={product.is_new}
-            isBestSeller={product.is_best_seller}
-          />
+          <div key={product.id} className="w-[220px] flex-shrink-0 snap-start sm:w-[260px]">
+            <ProductCard
+              slug={product.slug}
+              name={product.name}
+              price={product.price}
+              imageUrl={product.product_images?.[0]?.url}
+              isNew={product.is_new}
+              isBestSeller={product.is_best_seller}
+            />
+          </div>
         ))}
       </div>
     </section>
