@@ -13,14 +13,37 @@ function slugify(text: string) {
     .replace(/(^-|-$)/g, "");
 }
 
+async function ensureUniqueSlug(
+  supabase: Awaited<ReturnType<typeof createServerSupabaseClient>>,
+  baseSlug: string,
+  excludeId?: string
+): Promise<string> {
+  let candidate = baseSlug;
+  let suffix = 2;
+
+  while (true) {
+    let query = supabase.from("categories").select("id").eq("slug", candidate);
+    if (excludeId) query = query.neq("id", excludeId);
+    const { data } = await query.maybeSingle();
+
+    if (!data) return candidate;
+    candidate = `${baseSlug}-${suffix}`;
+    suffix += 1;
+  }
+}
+
 async function addCategory(formData: FormData) {
   "use server";
   const supabase = await createServerSupabaseClient();
   const name = String(formData.get("name") ?? "").trim();
   if (!name) return;
+
+  const baseSlug = slugify(name);
+  const slug = await ensureUniqueSlug(supabase, baseSlug);
+
   await supabase.from("categories").insert({
     name,
-    slug: slugify(name),
+    slug,
     parent_id: String(formData.get("parent_id") ?? "") || null,
     image_url: String(formData.get("image_url") ?? "").trim() || null,
     sort_order: Number(formData.get("sort_order") ?? 0),
@@ -34,11 +57,15 @@ async function updateCategory(formData: FormData) {
   const id = String(formData.get("id"));
   const name = String(formData.get("name") ?? "").trim();
   if (!id || !name) return;
+
+  const baseSlug = slugify(name);
+  const slug = await ensureUniqueSlug(supabase, baseSlug, id);
+
   await supabase
     .from("categories")
     .update({
       name,
-      slug: slugify(name),
+      slug,
       parent_id: String(formData.get("parent_id") ?? "") || null,
       image_url: String(formData.get("image_url") ?? "").trim() || null,
       sort_order: Number(formData.get("sort_order") ?? 0),
