@@ -3,6 +3,7 @@
 import { createClient as createServerSupabaseClient } from "@yedei/database/server";
 import { createServiceClient } from "@yedei/database/service";
 import { headers } from "next/headers";
+import { escapeHtml, sendNotificationEmail } from "@/lib/notify";
 
 type OrderItemInput = {
   productId: string;
@@ -23,6 +24,101 @@ function splitName(fullName: string) {
   const firstname = parts[0] || "Client";
   const lastname = parts.length > 1 ? parts.slice(1).join(" ") : firstname;
   return { firstname, lastname };
+}
+
+function formatFcfa(value: number) {
+  return value.toLocaleString("fr-FR") + " FCFA";
+}
+
+async function notifyNewOrder(params: {
+  orderId: string;
+  customerName: string;
+  phone: string;
+  email?: string;
+  address: string;
+  city?: string;
+  notes?: string;
+  paymentMethod: "livraison" | "fedapay";
+  subtotal: number;
+  deliveryFee: number;
+  total: number;
+  items: OrderItemInput[];
+}) {
+  const reference = params.orderId.slice(0, 8).toUpperCase();
+
+  const itemsHtml = params.items
+    .map((item) => {
+      const variant = item.variantLabel ? " (" + escapeHtml(item.variantLabel) + ")" : "";
+      return (
+        "<li>" +
+        escapeHtml(item.name) +
+        " — " +
+        escapeHtml(item.size) +
+        variant +
+        " × " +
+        item.quantity +
+        " — " +
+        formatFcfa(item.price * item.quantity) +
+        "</li>"
+      );
+    })
+    .join("");
+
+  const paymentText =
+    params.paymentMethod === "fedapay"
+      ? "Paiement en ligne (carte / Mobile Money) : " +
+        formatFcfa(params.total) +
+        " — en attente de confirmation du paiement."
+      : "Paiement à la livraison : frais de livraison " +
+        formatFcfa(params.deliveryFee) +
+        " à régler en ligne maintenant, " +
+        formatFcfa(params.subtotal) +
+        " à encaisser à la livraison.";
+
+  const emailLine = params.email
+    ? "<strong>Email :</strong> " + escapeHtml(params.email) + "<br>"
+    : "";
+  const notesBlock = params.notes
+    ? "<p><strong>Note du client :</strong> " + escapeHtml(params.notes) + "</p>"
+    : "";
+
+  const html =
+    "<h2>Nouvelle commande #" +
+    reference +
+    "</h2>" +
+    "<p><strong>Client :</strong> " +
+    escapeHtml(params.customerName) +
+    "<br>" +
+    "<strong>Téléphone :</strong> " +
+    escapeHtml(params.phone) +
+    "<br>" +
+    emailLine +
+    "<strong>Zone de livraison :</strong> " +
+    escapeHtml(params.city ?? "—") +
+    "<br>" +
+    "<strong>Adresse :</strong> " +
+    escapeHtml(params.address) +
+    "</p>" +
+    notesBlock +
+    "<ul>" +
+    itemsHtml +
+    "</ul>" +
+    "<p>Sous-total : " +
+    formatFcfa(params.subtotal) +
+    "<br>Livraison : " +
+    formatFcfa(params.deliveryFee) +
+    "<br><strong>Total : " +
+    formatFcfa(params.total) +
+    "</strong></p>" +
+    "<p>" +
+    paymentText +
+    "</p>" +
+    "<p>Retrouve la commande dans l'espace admin, page Commandes.</p>";
+
+  await sendNotificationEmail(
+    "Nouvelle commande #" + reference + " — " + formatFcfa(params.total),
+    html
+  );
 }
 
 export async function createOrder(input: {
@@ -86,15 +182,32 @@ export async function createOrder(input: {
     return { error: "Erreur lors de l'enregistrement des articles de la commande." };
   }
 
+  await notifyNewOrder({
+    orderId,
+    customerName: input.customerName.trim(),
+    phone: input.phone.trim(),
+    email: input.email?.trim() || undefined,
+    address: input.address.trim(),
+    city: input.city?.trim() || undefined,
+    notes: input.notes?.trim() || undefined,
+    paymentMethod: input.paymentMethod,
+    subtotal,
+    deliveryFee,
+    total,
+    items: input.items,
+  });
+
   // Ce qui doit être payé EN LIGNE maintenant :
   // - "fedapay" : tout (articles + livraison)
   // - "livraison" : seulement les frais de livraison
   const amountToChargeNow = input.paymentMethod === "fedapay" ? total : deliveryFee;
 
   if (amountToChargeNow <= 0) {
-    // Rien à payer en ligne (ex: zone de livraison gratuite)
     const serviceClient = createServiceClient();
-    await serviceClient.from("orders").update({ delivery_fee_paid: true, status: "confirmee" }).eq("id", orderId);
+    await serviceClient
+      .from("orders")
+      .update({ delivery_fee_paid: true, status: "confirmee" })
+      .eq("id", orderId);
     return { orderId };
   }
 
@@ -107,8 +220,7 @@ export async function createOrder(input: {
 
     if (!process.env.FEDAPAY_SECRET_KEY) {
       console.error("FEDAPAY_SECRET_KEY est absente des variables d'environnement au runtime.");
-      // TEMPORAIRE — DEBUG : à retirer une fois le problème identifié.
-      return { error: `[DEBUG] FEDAPAY_SECRET_KEY absente au runtime. env=${FEDAPAY_ENV}` };
+      return { error: "Impossible d'initier le paiement en ligne. Réessaie ou contacte-nous." };
     }
 
     const description =
@@ -140,10 +252,7 @@ export async function createOrder(input: {
 
     if (!createRes.ok) {
       console.error("FedaPay create transaction failed:", createRes.status, FEDAPAY_ENV, JSON.stringify(createData));
-      // TEMPORAIRE — DEBUG : à retirer une fois le problème identifié.
-      return {
-        error: `[DEBUG create ${createRes.status} env=${FEDAPAY_ENV} keyPrefix=${process.env.FEDAPAY_SECRET_KEY?.slice(0, 7)}] ${JSON.stringify(createData)}`,
-      };
+      return { error: "Impossible d'initier le paiement en ligne. Réessaie ou contacte-nous." };
     }
 
     const transaction = createData["v1/transaction"] ?? createData.transaction ?? createData;
@@ -151,8 +260,7 @@ export async function createOrder(input: {
 
     if (!transactionId) {
       console.error("FedaPay response missing transaction id:", JSON.stringify(createData));
-      // TEMPORAIRE — DEBUG : à retirer une fois le problème identifié.
-      return { error: `[DEBUG no-id env=${FEDAPAY_ENV}] ${JSON.stringify(createData)}` };
+      return { error: "Impossible d'initier le paiement en ligne. Réessaie ou contacte-nous." };
     }
 
     const tokenRes = await fetch(`${FEDAPAY_BASE_URL}/v1/transactions/${transactionId}/token`, {
@@ -167,16 +275,14 @@ export async function createOrder(input: {
 
     if (!tokenRes.ok) {
       console.error("FedaPay token generation failed:", tokenRes.status, JSON.stringify(tokenData));
-      // TEMPORAIRE — DEBUG : à retirer une fois le problème identifié.
-      return { error: `[DEBUG token ${tokenRes.status}] ${JSON.stringify(tokenData)}` };
+      return { error: "Impossible de générer le lien de paiement. Réessaie ou contacte-nous." };
     }
 
     const paymentUrl = tokenData?.url;
 
     if (!paymentUrl) {
       console.error("FedaPay token response missing url:", JSON.stringify(tokenData));
-      // TEMPORAIRE — DEBUG : à retirer une fois le problème identifié.
-      return { error: `[DEBUG no-url] ${JSON.stringify(tokenData)}` };
+      return { error: "Impossible de générer le lien de paiement. Réessaie ou contacte-nous." };
     }
 
     const serviceClient = createServiceClient();
@@ -192,8 +298,6 @@ export async function createOrder(input: {
     return { orderId, paymentUrl: paymentUrl as string };
   } catch (err) {
     console.error("Erreur inattendue lors de l'appel FedaPay:", err);
-    // TEMPORAIRE — DEBUG : à retirer une fois le problème identifié.
-    const message = err instanceof Error ? err.message : String(err);
-    return { error: `[DEBUG catch] ${message}` };
+    return { error: "Erreur de connexion au service de paiement. Réessaie ou contacte-nous." };
   }
 }
