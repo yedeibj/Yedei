@@ -2,6 +2,7 @@ import Link from "next/link";
 import { createServiceClient } from "@yedei/database/service";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { escapeHtml, sendNotificationEmail } from "@/lib/notify";
 
 const FEDAPAY_ENV = process.env.FEDAPAY_ENV === "live" ? "live" : "sandbox";
 const FEDAPAY_BASE_URL =
@@ -30,7 +31,7 @@ export default async function OrderReturnPage({
       const supabase = createServiceClient();
       const { data: orderRow } = await supabase
         .from("orders")
-        .select("payment_method, subtotal")
+        .select("payment_method, subtotal, delivery_fee_paid, customer_name")
         .eq("id", orderId)
         .eq("fedapay_transaction_id", String(transactionId))
         .single();
@@ -39,6 +40,8 @@ export default async function OrderReturnPage({
       subtotal = orderRow?.subtotal ? Number(orderRow.subtotal) : null;
 
       if (verifiedStatus === "approved" && orderRow) {
+        const alreadyConfirmed = orderRow.delivery_fee_paid === true;
+
         const updatePayload: Record<string, any> = { delivery_fee_paid: true, status: "confirmee" };
         if (paymentMethod === "fedapay") {
           updatePayload.payment_status = "paye";
@@ -48,6 +51,34 @@ export default async function OrderReturnPage({
           .update(updatePayload)
           .eq("id", orderId)
           .eq("fedapay_transaction_id", String(transactionId));
+
+        if (!alreadyConfirmed) {
+          const paidAmount = Number(transaction?.amount) || 0;
+          const reference = orderId.slice(0, 8).toUpperCase();
+          const paidText = paidAmount
+            ? paidAmount.toLocaleString("fr-FR") + " FCFA"
+            : "montant non précisé";
+          const scopeText =
+            paymentMethod === "fedapay"
+              ? "Commande entièrement payée en ligne."
+              : "Frais de livraison payés en ligne. Les articles restent à encaisser à la livraison.";
+
+          await sendNotificationEmail(
+            "Paiement confirmé — commande #" + reference,
+            "<h2>Paiement confirmé</h2>" +
+              "<p>Commande <strong>#" +
+              reference +
+              "</strong> — client : " +
+              escapeHtml(orderRow.customer_name ?? "—") +
+              "</p>" +
+              "<p>Montant reçu : <strong>" +
+              paidText +
+              "</strong></p>" +
+              "<p>" +
+              scopeText +
+              "</p>"
+          );
+        }
       }
     } catch {
       verifiedStatus = null;
