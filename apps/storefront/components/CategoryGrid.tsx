@@ -1,7 +1,7 @@
 import { createClient as createServerSupabaseClient } from "@yedei/database/server";
 import Link from "next/link";
 
-const THREAD_COLORS = ["#006400", "#dc143c", "#00008b", "#006400"];
+const THREAD_COLORS = ["#006400", "#dc143c", "#00008b", "#006400", "#dc143c"];
 
 export default async function CategoryGrid() {
   const supabase = await createServerSupabaseClient();
@@ -25,12 +25,12 @@ export default async function CategoryGrid() {
         <p className="mt-1 text-sm text-[#8C8579]">L'élégance pour toute la famille</p>
       </div>
 
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
+      <div className="flex flex-wrap justify-center gap-3 sm:gap-4">
         {categories.map((cat, i) => (
           <Link
             key={cat.id}
             href={`/collections/${cat.slug}`}
-            className="group relative aspect-[3/4] overflow-hidden rounded-md bg-[#F0EDE5]"
+            className="group relative aspect-[3/4] w-[calc(50%-6px)] overflow-hidden rounded-md bg-[#F0EDE5] sm:w-[calc(25%-12px)]"
           >
             {cat.image_url ? (
               <img
