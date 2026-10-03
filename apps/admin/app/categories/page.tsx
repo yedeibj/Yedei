@@ -47,6 +47,7 @@ async function addCategory(formData: FormData) {
     parent_id: String(formData.get("parent_id") ?? "") || null,
     image_url: String(formData.get("image_url") ?? "").trim() || null,
     sort_order: Number(formData.get("sort_order") ?? 0),
+    garment_type: String(formData.get("garment_type") ?? "") || null,
   });
   revalidatePath("/categories");
 }
