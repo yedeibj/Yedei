@@ -90,7 +90,14 @@ function CategoryEditForm({
   parentOptions,
   isChild,
 }: {
-  category: { id: string; name: string; parent_id: string | null; image_url: string | null; sort_order: number; garment_type: string | null };
+  category: {
+    id: string;
+    name: string;
+    parent_id: string | null;
+    image_url: string | null;
+    sort_order: number;
+    garment_type: string | null;
+  };
   parentOptions: { id: string; name: string }[];
   isChild?: boolean;
 }) {
@@ -129,7 +136,7 @@ function CategoryEditForm({
 
         <ImageUrlUploader name="image_url" defaultValue={category.image_url} bucket="hero" />
 
-                <div>
+        <div>
           <label className="block text-[10px] uppercase tracking-wide text-[#8C8579]">
             Type (pour "Complète ta tenue")
           </label>
@@ -179,7 +186,7 @@ function CategoryEditForm({
 
 export default async function CategoriesPage() {
   const supabase = await createServerSupabaseClient();
-    const { data: categories } = await supabase
+  const { data: categories } = await supabase
     .from("categories")
     .select("id, name, slug, parent_id, image_url, sort_order, garment_type")
     .order("sort_order");
@@ -192,7 +199,7 @@ export default async function CategoriesPage() {
       <h1 className="font-display text-2xl italic text-[#181715]">Catégories</h1>
       <p className="mt-1 text-sm text-[#8C8579]">
         Les 4 images ici sont celles affichées sur la page d'accueil (Homme / Femme / Enfant / Bébé).
-        Les sous-catégories (Fille / Garçon) n'apparaissent pas sur l'accueil, seulement sur leur page dédiée.
+        Le champ "Type" (Haut / Bas / Autre) sert au bloc "Complète ta tenue" sur la fiche produit.
       </p>
 
       <div className="mt-8 space-y-6">
@@ -233,7 +240,7 @@ export default async function CategoriesPage() {
             ))}
           </select>
           <ImageUrlUploader name="image_url" bucket="hero" />
-                    <select
+          <select
             name="garment_type"
             defaultValue=""
             className="w-full rounded-md border border-[#D8D3C9] bg-white px-3 py-2 text-sm outline-none focus:border-[#006400]"
@@ -251,11 +258,6 @@ export default async function CategoriesPage() {
             className="w-full rounded-md border border-[#D8D3C9] px-3 py-2 text-sm outline-none focus:border-[#006400]"
           />
           <button
-            type="submit"
-            className="rounded-md bg-[#006400] px-4 py-2 text-sm font-medium uppercase tracking-wide text-white hover:opacity-90"
-          >
-            Créer
-          </button>
             type="submit"
             className="rounded-md bg-[#006400] px-4 py-2 text-sm font-medium uppercase tracking-wide text-white hover:opacity-90"
           >
