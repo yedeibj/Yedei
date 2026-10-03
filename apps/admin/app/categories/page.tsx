@@ -90,7 +90,7 @@ function CategoryEditForm({
   parentOptions,
   isChild,
 }: {
-  category: { id: string; name: string; parent_id: string | null; image_url: string | null; sort_order: number };
+  category: { id: string; name: string; parent_id: string | null; image_url: string | null; sort_order: number; garment_type: string | null };
   parentOptions: { id: string; name: string }[];
   isChild?: boolean;
 }) {
