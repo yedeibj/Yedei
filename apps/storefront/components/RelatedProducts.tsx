@@ -57,10 +57,6 @@ export default async function RelatedProducts({
     .eq("is_active", true)
     .order("created_at", { ascending: false })
     .limit(10);
-
-  const products = (data ?? []).map((p: any) => ({
-    ...p,
-    product_images: [...(p.product_images ?? [])].sort(
       (a: any, b: any) => a.sort_order - b.sort_order
     ),
   }));
