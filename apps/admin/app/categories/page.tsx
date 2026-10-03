@@ -129,6 +129,22 @@ function CategoryEditForm({
 
         <ImageUrlUploader name="image_url" defaultValue={category.image_url} bucket="hero" />
 
+                <div>
+          <label className="block text-[10px] uppercase tracking-wide text-[#8C8579]">
+            Type (pour "Complète ta tenue")
+          </label>
+          <select
+            name="garment_type"
+            defaultValue={category.garment_type ?? ""}
+            className="mt-1 w-48 rounded-md border border-[#D8D3C9] bg-white px-2 py-1.5 text-sm outline-none focus:border-[#006400]"
+          >
+            <option value="">Non défini</option>
+            <option value="haut">Haut (chemise, t-shirt...)</option>
+            <option value="bas">Bas (pantalon, short, jupe...)</option>
+            <option value="autre">Autre (robe, ensemble, accessoire...)</option>
+          </select>
+        </div>
+
         <div className="flex items-center justify-between pt-1">
           <div>
             <label className="block text-[10px] uppercase tracking-wide text-[#8C8579]">Ordre</label>
