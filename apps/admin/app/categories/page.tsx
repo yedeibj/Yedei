@@ -233,6 +233,16 @@ export default async function CategoriesPage() {
             ))}
           </select>
           <ImageUrlUploader name="image_url" bucket="hero" />
+                    <select
+            name="garment_type"
+            defaultValue=""
+            className="w-full rounded-md border border-[#D8D3C9] bg-white px-3 py-2 text-sm outline-none focus:border-[#006400]"
+          >
+            <option value="">Type : non défini</option>
+            <option value="haut">Haut (chemise, t-shirt...)</option>
+            <option value="bas">Bas (pantalon, short, jupe...)</option>
+            <option value="autre">Autre (robe, ensemble, accessoire...)</option>
+          </select>
           <input
             name="sort_order"
             type="number"
@@ -241,6 +251,11 @@ export default async function CategoriesPage() {
             className="w-full rounded-md border border-[#D8D3C9] px-3 py-2 text-sm outline-none focus:border-[#006400]"
           />
           <button
+            type="submit"
+            className="rounded-md bg-[#006400] px-4 py-2 text-sm font-medium uppercase tracking-wide text-white hover:opacity-90"
+          >
+            Créer
+          </button>
             type="submit"
             className="rounded-md bg-[#006400] px-4 py-2 text-sm font-medium uppercase tracking-wide text-white hover:opacity-90"
           >
