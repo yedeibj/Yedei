@@ -4,6 +4,7 @@ import Link from "next/link";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import ProductDetail from "@/components/ProductDetail";
+import RelatedProducts from "@/components/RelatedProducts";
 
 export default async function ProductPage({
   params,
@@ -16,7 +17,7 @@ export default async function ProductPage({
   const { data: product } = await supabase
     .from("products")
     .select(
-      "id, name, description, price, discount_percent, categories(name, slug), product_images(url, sort_order), product_variants(id, size, sku, stock, price, image_url)"
+      "id, name, description, price, discount_percent, category_id, categories(name, slug), product_images(url, sort_order), product_variants(id, size, sku, stock, price, image_url)"
     )
     .eq("slug", slug)
     .eq("is_active", true)
@@ -65,6 +66,8 @@ export default async function ProductPage({
         images={images}
         variants={variants}
       />
+
+      <RelatedProducts categoryId={product.category_id} excludeProductId={product.id} />
 
       <Footer />
     </main>
