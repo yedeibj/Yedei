@@ -179,9 +179,9 @@ function CategoryEditForm({
 
 export default async function CategoriesPage() {
   const supabase = await createServerSupabaseClient();
-  const { data: categories } = await supabase
+    const { data: categories } = await supabase
     .from("categories")
-    .select("id, name, slug, parent_id, image_url, sort_order")
+    .select("id, name, slug, parent_id, image_url, sort_order, garment_type")
     .order("sort_order");
 
   const all = categories ?? [];
