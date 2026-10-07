@@ -202,11 +202,6 @@ export async function createOrder(input: {
     items: input.items,
   });
 
-  // Ce qui doit être payé EN LIGNE maintenant :
-  // - "fedapay" : tout (articles + livraison)
-  // - "livraison" : seulement les frais de livraison
-  const amountToChargeNow = input.paymentMethod === "fedapay" ? total : deliveryFee;
-
   if (amountToChargeNow <= 0) {
     const serviceClient = createServiceClient();
     await serviceClient
