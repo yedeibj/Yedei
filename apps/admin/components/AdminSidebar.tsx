@@ -20,18 +20,26 @@ const links = [
   { label: "Pages légales", href: "/pages-legales" },
 ];
 
-export default function AdminSidebar({ unreadMessages = 0 }: { unreadMessages?: number }) {
+export default function AdminSidebar({
+  unreadMessages = 0,
+  newOrders = 0,
+}: {
+  unreadMessages?: number;
+  newOrders?: number;
+}) {
   const pathname = usePathname();
+  const badgeByHref: Record<string, number> = {
+    "/messages": unreadMessages,
+    "/commandes": newOrders,
+  };
 
   return (
     <nav className="flex h-full w-56 flex-shrink-0 flex-col gap-1 border-r border-[#D8D3C9] bg-white px-4 py-6">
       {links.map((link) => {
         const isActive =
           link.href === "/" ? pathname === "/" : pathname.startsWith(link.href);
-        const label =
-          link.href === "/messages" && unreadMessages > 0
-            ? `${link.label} (${unreadMessages})`
-            : link.label;
+        const count = badgeByHref[link.href] ?? 0;
+        const label = count > 0 ? `${link.label} (${count})` : link.label;
         return (
           <Link
             key={link.href}
