@@ -45,8 +45,12 @@ export default async function OrdersPage({
     )
     .order("created_at", { ascending: false });
 
-  if (filtre && filtre !== "toutes") query = query.eq("status", filtre);
-
+  if (filtre && filtre !== "toutes") {
+    query = query.eq("status", filtre);
+  } else {
+    // Par défaut, on masque les commandes dont le paiement requis n'a jamais été confirmé
+    query = query.neq("status", "en_attente_paiement");
+  }
   const { data: orders } = await query;
   const statusEntries = Object.entries(STATUS_LABELS);
 
