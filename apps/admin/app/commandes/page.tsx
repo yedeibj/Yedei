@@ -5,6 +5,7 @@ import OrderStatusForm from "@/components/OrderStatusForm";
 import ConfirmSubmitButton from "@/components/ConfirmSubmitButton";
 
 const STATUS_LABELS: Record<string, string> = {
+  en_attente_paiement: "En attente de paiement",
   en_attente: "En attente",
   confirmee: "Confirmée",
   expediee: "Expédiée",
@@ -13,13 +14,13 @@ const STATUS_LABELS: Record<string, string> = {
 };
 
 const STATUS_COLORS: Record<string, string> = {
+  en_attente_paiement: "bg-[#F0EDE5] text-[#8C8579]",
   en_attente: "bg-[#EEF3FF] text-[#00008B]",
   confirmee: "bg-[#E8F5E9] text-[#006400]",
   expediee: "bg-[#EEF3FF] text-[#00008B]",
   livree: "bg-[#E8F5E9] text-[#006400]",
   annulee: "bg-[#FDECEF] text-[#DC143C]",
 };
-
 async function deleteOrder(formData: FormData) {
   "use server";
   const supabase = await createServerSupabaseClient();
