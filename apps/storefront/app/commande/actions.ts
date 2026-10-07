@@ -139,11 +139,15 @@ export async function createOrder(input: {
     return { error: "Merci de remplir tous les champs obligatoires." };
   }
 
-  const supabase = await createServerSupabaseClient();
+    const supabase = await createServerSupabaseClient();
   const subtotal = input.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const deliveryFee = Number(input.deliveryFee) || 0;
   const total = subtotal + deliveryFee;
   const orderId = crypto.randomUUID();
+
+  // Ce qui doit être payé EN LIGNE : tout si "fedapay", juste la livraison si "livraison"
+  const amountToChargeNow = input.paymentMethod === "fedapay" ? total : deliveryFee;
+  const initialStatus = amountToChargeNow > 0 ? "en_attente_paiement" : "confirmee";
 
   const { error: orderError } = await supabase.from("orders").insert({
     id: orderId,
@@ -157,6 +161,7 @@ export async function createOrder(input: {
     delivery_fee: deliveryFee,
     total,
     payment_method: input.paymentMethod,
+    status: initialStatus,
   });
 
   if (orderError) {
