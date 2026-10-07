@@ -15,17 +15,19 @@ export async function sendNotificationEmail(
   options?: { replyTo?: string }
 ) {
   const apiKey = process.env.RESEND_API_KEY;
-  const to = process.env.NOTIFY_EMAIL_TO;
+  const toRaw = process.env.NOTIFY_EMAIL_TO;
 
-  if (!apiKey || !to) {
+  if (!apiKey || !toRaw) {
     console.error("Notification ignorée : RESEND_API_KEY ou NOTIFY_EMAIL_TO manquante.");
     return;
   }
 
+  const to = toRaw.split(",").map((addr) => addr.trim()).filter(Boolean);
+
   try {
     const payload: Record<string, unknown> = {
       from: "YEDEI <onboarding@resend.dev>",
-      to: [to],
+      to,
       subject,
       html,
     };
