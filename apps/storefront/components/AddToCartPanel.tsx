@@ -85,6 +85,9 @@ export default function AddToCartPanel({
     ? computeCompareAtPrice(displayedPrice, discountPercent)
     : null;
 
+  const rangeCompareMin = computeCompareAtPrice(priceRange.min, discountPercent);
+  const rangeCompareMax = computeCompareAtPrice(priceRange.max, discountPercent);
+
   function handleSelectColor(colorName: string, hex: string | null) {
     setSelectedColor(colorName);
     setSelectedVariantId(null);
@@ -137,11 +140,23 @@ export default function AddToCartPanel({
             )}
           </>
         ) : priceRange.min === priceRange.max ? (
-          <p className="text-xl text-[#181715]">{formatFcfa(priceRange.min)}</p>
+          <>
+            <p className="text-xl text-[#181715]">{formatFcfa(priceRange.min)}</p>
+            {rangeCompareMin && (
+              <p className="text-sm text-[#8C8579] line-through">{formatFcfa(rangeCompareMin)}</p>
+            )}
+          </>
         ) : (
-          <p className="text-xl text-[#181715]">
-            {formatFcfa(priceRange.min)} – {formatFcfa(priceRange.max)}
-          </p>
+          <div>
+            <p className="text-xl text-[#181715]">
+              {formatFcfa(priceRange.min)} – {formatFcfa(priceRange.max)}
+            </p>
+            {(rangeCompareMin || rangeCompareMax) && (
+              <p className="text-sm text-[#8C8579] line-through">
+                {formatFcfa(rangeCompareMin ?? priceRange.min)} – {formatFcfa(rangeCompareMax ?? priceRange.max)}
+              </p>
+            )}
+          </div>
         )}
       </div>
 
