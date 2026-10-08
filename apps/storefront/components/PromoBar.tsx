@@ -1,5 +1,7 @@
 import { createClient as createServerSupabaseClient } from "@yedei/database/server";
 
+const MIN_REPEATED_ITEMS = 8;
+
 export default async function PromoBar() {
   const supabase = await createServerSupabaseClient();
   const { data: messages } = await supabase
@@ -10,7 +12,8 @@ export default async function PromoBar() {
 
   if (!messages || messages.length === 0) return null;
 
-  const loopMessages = [...messages, ...messages];
+  const repeatCount = Math.max(2, Math.ceil(MIN_REPEATED_ITEMS / messages.length));
+  const loopMessages = Array.from({ length: repeatCount }, () => messages).flat();
 
   return (
     <div className="w-full overflow-hidden bg-[#181715] text-white">
