@@ -12,9 +12,10 @@ export default async function PromoBar() {
 
   if (!messages || messages.length === 0) return null;
 
-  const repeatCount = Math.max(2, Math.ceil(MIN_REPEATED_ITEMS / messages.length));
+  const rawRepeatCount = Math.max(2, Math.ceil(MIN_REPEATED_ITEMS / messages.length));
+  const repeatCount = rawRepeatCount % 2 === 0 ? rawRepeatCount : rawRepeatCount + 1;
   const loopMessages = Array.from({ length: repeatCount }, () => messages).flat();
-
+  
   return (
     <div className="w-full overflow-hidden bg-[#181715] text-white">
       <div className="flex w-max animate-marquee whitespace-nowrap py-2">
