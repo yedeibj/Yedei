@@ -139,7 +139,7 @@ export async function createOrder(input: {
     return { error: "Merci de remplir tous les champs obligatoires." };
   }
 
-    const supabase = await createServerSupabaseClient();
+  const supabase = await createServerSupabaseClient();
   const subtotal = input.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const deliveryFee = Number(input.deliveryFee) || 0;
   const total = subtotal + deliveryFee;
