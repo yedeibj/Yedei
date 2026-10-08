@@ -17,7 +17,7 @@ export default async function ProductPage({
   const { data: product } = await supabase
     .from("products")
     .select(
-      "id, name, description, price, discount_percent, category_id, categories(name, slug), product_images(url, sort_order), product_variants(id, size, sku, stock, price, image_url)"
+      "id, name, description, price, discount_percent, category_id, categories(name, slug), product_images(url, sort_order), product_variants(id, size, sku, stock, price, image_url, color, color_hex)"
     )
     .eq("slug", slug)
     .eq("is_active", true)
@@ -35,6 +35,8 @@ export default async function ProductPage({
     stock: v.stock,
     price: v.price !== null && v.price !== undefined ? Number(v.price) : null,
     imageUrl: v.image_url ?? null,
+    color: v.color ?? null,
+    colorHex: v.color_hex ?? null,
   }));
   const category = Array.isArray(product.categories) ? product.categories[0] : product.categories;
 
