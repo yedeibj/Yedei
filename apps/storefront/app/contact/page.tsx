@@ -48,6 +48,19 @@ export default async function ContactPage() {
               </div>
             )}
           </div>
+
+          <div className="mt-8 overflow-hidden rounded-2xl border border-[#D8D3C9]">
+            <iframe
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3964.5615324644436!2d2.3468166999999993!3d6.4502938!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x1024a9e5ae96c875%3A0x5429104e4080266b!2sYedei!5e0!3m2!1sfr!2sbj!4v1791627262605!5m2!1sfr!2sbj"
+              width="100%"
+              height="320"
+              style={{ border: 0 }}
+              allowFullScreen
+              loading="lazy"
+              referrerPolicy="strict-origin-when-cross-origin"
+              title="Localisation YEDEI"
+            />
+          </div>
         </div>
 
         <div className="rounded-2xl border border-[#D8D3C9] bg-[#F6F3EC] p-6 sm:p-8">
