@@ -16,7 +16,8 @@ export default async function CategoryGrid() {
   const firstRow = categories.slice(0, 3);
   const secondRow = categories.slice(3);
 
-  function Card({ cat, index, wide }: { cat: (typeof categories)[number]; index: number; wide?: boolean }) {
+    type CategoryItem = { id: string; name: string; slug: string; image_url: string | null };
+  function Card({ cat, index, wide }: { cat: CategoryItem; index: number; wide?: boolean }) {
     return (
       <Link
         href={`/collections/${cat.slug}`}
