@@ -103,6 +103,11 @@ export default async function OrdersPage({
                   {order.phone}{order.email ? " · " + order.email : ""}
                 </p>
                 <p className="text-xs text-[#8C8579]">{order.address}</p>
+                {order.city_detail && (
+                  <p className="text-xs text-[#8C8579]">
+                    Ville : <span className="text-[#181715]">{order.city_detail}</span>
+                  </p>
+                )}
                 <p className="text-xs text-[#8C8579]">
                   Zone de livraison : <span className="text-[#181715]">{order.city || "Non renseignée"}</span>
                 </p>
