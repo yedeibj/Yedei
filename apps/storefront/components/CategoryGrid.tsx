@@ -13,10 +13,11 @@ export default async function CategoryGrid() {
 
   if (!categories || categories.length === 0) return null;
 
+  type CategoryItem = { id: string; name: string; slug: string; image_url: string | null };
+
   const firstRow = categories.slice(0, 3);
   const secondRow = categories.slice(3);
 
-    type CategoryItem = { id: string; name: string; slug: string; image_url: string | null };
   function Card({ cat, index, wide }: { cat: CategoryItem; index: number; wide?: boolean }) {
     return (
       <Link
@@ -56,13 +57,19 @@ export default async function CategoryGrid() {
         <p className="mt-1 text-sm text-[#8C8579]">L'élégance pour toute la famille</p>
       </div>
 
-      {/* Mobile : défilement horizontal, une seule rangée fluide */}
-      <div className="flex gap-3 overflow-x-auto scroll-smooth pb-2 snap-x snap-mandatory [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden sm:hidden">
-        {categories.map((cat, i) => (
-          <div key={cat.id} className="w-[42vw] flex-shrink-0 snap-start">
-            <Card cat={cat} index={i} />
-          </div>
-        ))}
+      {/* Mobile : défilement horizontal, cartes plus étroites pour montrer qu'il y a une suite */}
+      <div className="relative sm:hidden">
+        <div className="flex gap-3 overflow-x-auto scroll-smooth pb-2 pl-1 snap-x snap-mandatory [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+          {categories.map((cat, i) => (
+            <div key={cat.id} className="w-[40%] flex-shrink-0 snap-start">
+              <Card cat={cat} index={i} />
+            </div>
+          ))}
+        </div>
+        <div
+          className="pointer-events-none absolute right-0 top-0 h-[calc(100%-8px)] w-10 bg-gradient-to-l from-white to-transparent"
+          aria-hidden="true"
+        />
       </div>
 
       {/* Desktop : mosaïque 3 (petites) puis 2 (grandes), centrées */}
