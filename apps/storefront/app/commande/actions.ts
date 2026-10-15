@@ -150,11 +150,12 @@ export async function createOrder(input: {
   const amountToChargeNow = input.paymentMethod === "fedapay" ? total : deliveryFee;
   const initialStatus = amountToChargeNow > 0 ? "en_attente_paiement" : "confirmee";
 
-  const { error: orderError } = await supabase.from("orders").insert({
+    const { error: orderError } = await supabase.from("orders").insert({
     id: orderId,
     customer_name: input.customerName.trim(),
     phone: input.phone.trim(),
     email: input.email?.trim() || null,
+    city_detail: input.cityDetail?.trim() || null,
     address: input.address.trim(),
     city: input.city?.trim() || null,
     notes: input.notes?.trim() || null,
