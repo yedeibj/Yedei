@@ -17,6 +17,7 @@ export default function CheckoutForm({ zones }: { zones: Zone[] }) {
   const [customerName, setCustomerName] = useState("");
   const [phone, setPhone] = useState("");
   const [email, setEmail] = useState("");
+  const [cityDetail, setCityDetail] = useState("");
   const [address, setAddress] = useState("");
   const [notes, setNotes] = useState("");
   const [zoneId, setZoneId] = useState(
@@ -46,6 +47,7 @@ export default function CheckoutForm({ zones }: { zones: Zone[] }) {
       customerName,
       phone,
       email,
+      cityDetail,
       address,
       city: selectedZone.name,
       notes,
@@ -168,6 +170,19 @@ export default function CheckoutForm({ zones }: { zones: Zone[] }) {
                 className="mt-1 w-full rounded-md border border-[#D8D3C9] px-3 py-2 text-sm outline-none focus:border-[#006400]"
               />
             </div>
+          </div>
+
+          <div>
+            <label className="block text-xs uppercase tracking-wide text-[#181715]">
+              Ville
+            </label>
+            <input
+              required
+              value={cityDetail}
+              onChange={(e) => setCityDetail(e.target.value)}
+              placeholder="Ex: Parakou, Porto-Novo, Abomey..."
+              className="mt-1 w-full rounded-md border border-[#D8D3C9] px-3 py-2 text-sm outline-none focus:border-[#006400]"
+            />
           </div>
 
           <div>
