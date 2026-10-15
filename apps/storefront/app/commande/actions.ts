@@ -125,6 +125,7 @@ export async function createOrder(input: {
   customerName: string;
   phone: string;
   email?: string;
+  cityDetail?: string;
   address: string;
   city?: string;
   notes?: string;
