@@ -38,10 +38,10 @@ export default async function OrdersPage({
   const { filtre } = await searchParams;
   const supabase = await createServerSupabaseClient();
 
-  let query = supabase
+    let query = supabase
     .from("orders")
     .select(
-      "id, customer_name, phone, email, address, city, notes, subtotal, delivery_fee, delivery_fee_paid, total, status, payment_status, payment_method, created_at, order_items(product_name, variant_size, variant_label, unit_price, quantity)"
+      "id, customer_name, phone, email, city_detail, address, city, notes, subtotal, delivery_fee, delivery_fee_paid, total, status, payment_status, payment_method, created_at, order_items(product_name, variant_size, variant_label, unit_price, quantity)"
     )
     .order("created_at", { ascending: false });
 
