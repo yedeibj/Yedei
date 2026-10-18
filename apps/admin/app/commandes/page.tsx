@@ -92,12 +92,21 @@ export default async function OrdersPage({
         {(orders ?? []).map((order: any) => (
           <div key={order.id} className="rounded-md border border-[#D8D3C9] p-4">
             <div className="flex flex-wrap items-start justify-between gap-3">
-              <div>
+                           <div>
                 <p className="text-sm font-medium text-[#181715]">
                   {order.customer_name}{" "}
                   <span className="text-xs font-normal text-[#8C8579]">
                     #{order.id.slice(0, 8).toUpperCase()}
                   </span>
+                </p>
+                <p className="text-xs text-[#8C8579]">
+                  {new Date(order.created_at).toLocaleString("fr-FR", {
+                    day: "2-digit",
+                    month: "2-digit",
+                    year: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
                 </p>
                 <p className="text-xs text-[#8C8579]">
                   {order.phone}{order.email ? " · " + order.email : ""}
