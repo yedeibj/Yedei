@@ -1,10 +1,13 @@
 import type { Metadata } from "next";
+import Script from "next/script";
 import { Fraunces, Manrope } from "next/font/google";
 import "./globals.css";
 import PromoBar from "@/components/PromoBar";
 import { CartProvider } from "@/lib/cart-context";
 import CartDrawer from "@/components/CartDrawer";
 import ServiceWorkerRegister from "@/components/ServiceWorkerRegister";
+
+const GA_ID = "G-6QN6FJSLG1";
 
 const fraunces = Fraunces({
   subsets: ["latin"],
@@ -45,6 +48,12 @@ export const metadata: Metadata = {
   },
 };
 
+const gaInlineScript =
+  "window.dataLayer = window.dataLayer || [];" +
+  "function gtag(){dataLayer.push(arguments);}" +
+  "gtag('js', new Date());" +
+  "gtag('config', '" + GA_ID + "');";
+
 export default function RootLayout({
   children,
 }: {
@@ -59,6 +68,13 @@ export default function RootLayout({
           <CartDrawer />
         </CartProvider>
         <ServiceWorkerRegister />
+        <Script
+          src={"https://www.googletagmanager.com/gtag/js?id=" + GA_ID}
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {gaInlineScript}
+        </Script>
       </body>
     </html>
   );
